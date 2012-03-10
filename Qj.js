@@ -1,5 +1,5 @@
 /**
- * Qj 0.1
+ * Qj v0.1.0-alpha
  * a light-weight JavaScript framework
  * http://github.com/murger/Qj/
  *
@@ -51,7 +51,6 @@
 	},
 
 	_Qj = window.Qj, // Save Qj to restore later if needed
-	proto = Qj.prototype,
 	toString = Object.prototype.toString,
 	push = Array.prototype.push,
 	hasOwn = Object.prototype.hasOwnProperty,
@@ -129,6 +128,11 @@
 			classTypeMap[toString.call(obj)] || 'object';
 	},
 
+	hasClass = Qj.hasClass = function(node, classStr) {
+		return node && classStr &&
+			!!~(' ' + node.className + ' ').indexOf(' ' + classStr + ' ');
+	},
+
 	// Class to type mapping
 	classTypeMap = {};
 
@@ -138,14 +142,24 @@
 		}
 	);
 
-	// Add methods to Qj.prototype
-	each('size getz get each extend type'.split(' '), function(val) {
-		proto[val] = function () {
+	// Add core methods to Qj.prototype
+	each('size get each extend type'.split(' '), function(val) {
+		Qj.prototype[val] = function () {
 			var args = [this];
 			push.apply(args, arguments);
 			return Qj[val].apply(this, args);
 		};
 	});
+
+	Qj.prototype.hasClass = function(cssClass) {
+		for (var node, i = 0; node = this[i]; i++) {
+			if (hasClass(node, cssClass)) {
+				return true;
+			}
+		}
+
+		return false;
+	};
 
 	// Expose Qj
 	window.Qj = Qj;
