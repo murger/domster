@@ -33,7 +33,7 @@
   *
   * Selector: avoid
   * Core: each, extend
-  * Classes: addClass, removeClass, hasClass
+  * Classes: addClass, removeClass
   * Attributes: attr
   * CSS: css
   * DOM Traversing: find
@@ -42,6 +42,9 @@
  **/
 
 (function(window, document) {
+	/**
+	 * Constructor
+	**/
 	var Qj = function(selector, root) {
 		if (!(this instanceof Qj)) {
 			return new Qj(selector, root);
@@ -52,9 +55,12 @@
 
 	_Qj = window.Qj, // Save Qj to restore later if needed
 	toString = Object.prototype.toString,
-	push = Array.prototype.push,
 	hasOwn = Object.prototype.hasOwnProperty,
+	push = Array.prototype.push,
 
+	/**
+	 * Selector
+	**/
 	query = function(selector, root) {
 		root = document.querySelector(root) || document;
 
@@ -63,6 +69,9 @@
 			[];
 	},
 
+	/**
+	 * Core
+	**/
 	toArray = function (list) {
 		for (var arr = [], i = list.length >>> 0; i--;) {
 			arr[i] = list[i];
@@ -128,6 +137,9 @@
 			classTypeMap[toString.call(obj)] || 'object';
 	},
 
+	/**
+	 * CSS
+	**/
 	hasClass = Qj.hasClass = function(node, classStr) {
 		return node && classStr &&
 			!!~(' ' + node.className + ' ').indexOf(' ' + classStr + ' ');
@@ -142,7 +154,7 @@
 		}
 	);
 
-	// Add core methods to Qj.prototype
+	// Core methods to Qj.prototype
 	each('size get each extend type'.split(' '), function(val) {
 		Qj.prototype[val] = function () {
 			var args = [this];
@@ -151,6 +163,7 @@
 		};
 	});
 
+	// CSS methods to Qj.prototype
 	Qj.prototype.hasClass = function(cssClass) {
 		for (var node, i = 0; node = this[i]; i++) {
 			if (hasClass(node, cssClass)) {
