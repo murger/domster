@@ -30,21 +30,14 @@
 
  /**
   * TODO
-  *
-  * Selector: avoid
-  * Core: each, extend
-  * Classes: addClass, removeClass
-  * Attributes: attr
-  * CSS: css
+  * CSS: addClass, removeClass, css
   * DOM Traversing: find
-  * DOM Manipulation: insert, html
+  * DOM Manipulation: insert, attr, html
   * EVENTS: bind, unbind, trigger
  **/
 
 (function(window, document) {
-	/**
-	 * Constructor
-	**/
+	// Constructor
 	var Qj = function(selector, root) {
 		if (!(this instanceof Qj)) {
 			return new Qj(selector, root);
@@ -53,10 +46,18 @@
 		extend(this, query(selector, root));
 	},
 
-	_Qj = window.Qj, // Save Qj to restore later if needed
+	// Shortcuts, helpers, etc...
+	_Qj = window.Qj,
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push,
+	toArray = function (list) {
+		for (var arr = [], i = list.length >>> 0; i--;) {
+			arr[i] = list[i];
+		}
+
+		return arr;
+	},
 
 	/**
 	 * Selector
@@ -70,16 +71,8 @@
 	},
 
 	/**
-	 * Core
+	 * Core methods
 	**/
-	toArray = function (list) {
-		for (var arr = [], i = list.length >>> 0; i--;) {
-			arr[i] = list[i];
-		}
-
-		return arr;
-	},
-
 	get = Qj.get = function (obj, idx) {
 		var i = idx || 0;
 
@@ -145,7 +138,9 @@
 			!!~(' ' + node.className + ' ').indexOf(' ' + classStr + ' ');
 	},
 
-	// Class to type mapping
+	/**
+	 * Class to type map for Qj.type()
+	**/
 	classTypeMap = {};
 
 	each('Boolean Number String Function Array Date RegExp Object'.split(' '),
@@ -154,7 +149,9 @@
 		}
 	);
 
-	// Core methods to Qj.prototype
+	/**
+	 * Attach methods to Qj.prototype
+	**/
 	each('size get each extend type'.split(' '), function(val) {
 		Qj.prototype[val] = function () {
 			var args = [this];
@@ -163,7 +160,6 @@
 		};
 	});
 
-	// CSS methods to Qj.prototype
 	Qj.prototype.hasClass = function(cssClass) {
 		for (var node, i = 0; node = this[i]; i++) {
 			if (hasClass(node, cssClass)) {
@@ -172,6 +168,19 @@
 		}
 
 		return false;
+	};
+
+	/**
+	 * Free up Qj and map it something else
+	**/
+	Qj.mapAlias = function () {
+		if (!_Qj && window.Qj) {
+			delete window.Qj;
+		} else {
+			window.Qj = _Qj;
+		}
+
+		return Qj;
 	};
 
 	// Expose Qj
