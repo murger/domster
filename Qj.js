@@ -1,5 +1,5 @@
-/*!
- * Qj v0.0.1
+/**
+ * Qj 0.1
  * a light-weight JavaScript framework
  * http://github.com/murger/qj/
  *
@@ -26,14 +26,113 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
+**/
 
-(function(window) {
-	var document = window.document,
-		navigator = window.navigator,
-		location = window.location;
+ /**
+  *	TODO
+  *
+  * Selector: avoid
+  * Core: each, extend
+  * Classes: addClass, removeClass, hasClass
+  * Attributes: attr
+  * CSS: css
+  * DOM Traversing: find, get
+  * DOM Manipulation: insert, html
+  * EVENTS: bind, unbind, trigger
+ **/
 
-	var Qj = {};
+(function(window, document) {
+	var Qj = function(selector, root) {
+		if (!(this instanceof Qj)) {
+			return new Qj(selector, root);
+		}
 
-	window.Qj = Qj.get;
-})(window);
+		var sel = query(selector, root);
+
+		//this.count = sel.length;
+		extend(this, sel);
+	},
+
+	_Qj = window.Qj, // Save Qj to restore later if needed
+	proto = Qj.prototype,
+	toString = Object.prototype.toString,
+	push = Array.prototype.push,
+	hasOwn = Object.prototype.hasOwnProperty,
+
+	query = function(selector, root) {
+		root = document.querySelector(root) || document;
+		return selector ?
+			toArray(root.querySelectorAll(selector)) :
+			[];
+	},
+
+	toArray = Qj.toArray = function (list) {
+		for (var arr = [], i = list.length >>> 0; i--;) {
+			arr[i] = list[i];
+		}
+
+		return arr;
+	},
+
+	each = Qj.each = function (obj, fn, context) {
+		if (type(obj) === 'array') {
+			for (var i = 0; i < obj.length; i++) {
+				fn.call(context, obj[i], i, obj);
+			}
+		} else {
+			for (var prop in obj) {
+				if (hasOwn.call(obj, prop)) {
+					fn.call(context, obj[prop], prop, obj);
+				}
+			}
+		}
+
+		return obj;
+	},
+
+	size = Qj.size = function (obj) {
+		var count = 0;
+		for (var prop in obj) {
+			if (hasOwn.call(obj, prop)) { count++; }
+		}
+
+		return count;
+	},
+
+	extend = Qj.extend = function(obj, src) {
+		if (type(src) === 'array') {
+			for (var i = 0; i < src.length; i++) {
+				if (type(obj) === 'array') { obj[obj.length] = src[i]; }
+				else { obj[i] = src[i]; }
+			}
+		} else {
+			for (var prop in src) { obj[prop] = src[prop]; }
+		}
+
+		return obj;
+	},
+
+	type = Qj.type = function(obj) {
+		return obj == null ?
+			String(obj) :
+			classTypeMap[toString.call(obj)] || 'object';
+	},
+
+	classTypeMap = {};
+
+	each('Boolean Number String Function Array Date RegExp Object'.split(' '), function(val) {
+		classTypeMap['[object ' + val + ']'] = val.toLowerCase();
+	});
+
+	// Add methods to Qj.prototype
+	each('each extend size type'.split(' '), function( val ) {
+		proto[val] = function () {
+			var args = [this];
+			push.apply(args, arguments);
+			return Qj[val].apply(this, args);
+		};
+	});
+
+	// Expose
+	window.Qj = Qj;
+})(this, this.document);
