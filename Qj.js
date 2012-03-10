@@ -1,7 +1,7 @@
 /**
  * Qj 0.1
  * a light-weight JavaScript framework
- * http://github.com/murger/qj/
+ * http://github.com/murger/Qj/
  *
  * Copyright 2012, Gurhan Mermer
  * http://twitter.com/murger/
@@ -29,14 +29,14 @@
 **/
 
  /**
-  *	TODO
+  * TODO
   *
   * Selector: avoid
   * Core: each, extend
   * Classes: addClass, removeClass, hasClass
   * Attributes: attr
   * CSS: css
-  * DOM Traversing: find, get
+  * DOM Traversing: find
   * DOM Manipulation: insert, html
   * EVENTS: bind, unbind, trigger
  **/
@@ -47,10 +47,7 @@
 			return new Qj(selector, root);
 		}
 
-		var sel = query(selector, root);
-
-		//this.count = sel.length;
-		extend(this, sel);
+		extend(this, query(selector, root));
 	},
 
 	_Qj = window.Qj, // Save Qj to restore later if needed
@@ -61,17 +58,35 @@
 
 	query = function(selector, root) {
 		root = document.querySelector(root) || document;
+
 		return selector ?
 			toArray(root.querySelectorAll(selector)) :
 			[];
 	},
 
-	toArray = Qj.toArray = function (list) {
+	toArray = function (list) {
 		for (var arr = [], i = list.length >>> 0; i--;) {
 			arr[i] = list[i];
 		}
 
 		return arr;
+	},
+
+	get = Qj.get = function (obj, idx) {
+		var i = idx || 0;
+
+		return obj[(i < 0) ? size(obj) + i : i];
+	},
+
+	size = Qj.size = function (obj) {
+		var count = 0;
+		for (var prop in obj) {
+			if (hasOwn.call(obj, prop)) {
+				count++;
+			}
+		}
+
+		return count;
 	},
 
 	each = Qj.each = function (obj, fn, context) {
@@ -90,26 +105,22 @@
 		return obj;
 	},
 
-	size = Qj.size = function (obj) {
-		var count = 0;
-		for (var prop in obj) {
-			if (hasOwn.call(obj, prop)) { count++; }
-		}
-
-		return count;
-	},
-
-	extend = Qj.extend = function(obj, src) {
+	extend = Qj.extend = function(targ, src) {
 		if (type(src) === 'array') {
 			for (var i = 0; i < src.length; i++) {
-				if (type(obj) === 'array') { obj[obj.length] = src[i]; }
-				else { obj[i] = src[i]; }
+				if (type(targ) === 'array') {
+					targ[targ.length] = src[i];
+				} else {
+					targ[i] = src[i];
+				}
 			}
 		} else {
-			for (var prop in src) { obj[prop] = src[prop]; }
+			for (var prop in src) {
+				targ[prop] = src[prop];
+			}
 		}
 
-		return obj;
+		return targ;
 	},
 
 	type = Qj.type = function(obj) {
@@ -118,14 +129,17 @@
 			classTypeMap[toString.call(obj)] || 'object';
 	},
 
+	// Class to type mapping
 	classTypeMap = {};
 
-	each('Boolean Number String Function Array Date RegExp Object'.split(' '), function(val) {
-		classTypeMap['[object ' + val + ']'] = val.toLowerCase();
-	});
+	each('Boolean Number String Function Array Date RegExp Object'.split(' '),
+		function(val) {
+			classTypeMap['[object ' + val + ']'] = val.toLowerCase();
+		}
+	);
 
 	// Add methods to Qj.prototype
-	each('each extend size type'.split(' '), function( val ) {
+	each('size getz get each extend type'.split(' '), function(val) {
 		proto[val] = function () {
 			var args = [this];
 			push.apply(args, arguments);
@@ -133,6 +147,6 @@
 		};
 	});
 
-	// Expose
+	// Expose Qj
 	window.Qj = Qj;
 })(this, this.document);
