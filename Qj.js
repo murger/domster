@@ -31,9 +31,9 @@
  /**
   * TODO
   * CSS: addClass, removeClass, css
-  * DOM Traversing: find
-  * DOM Manipulation: insert, attr, html
-  * EVENTS: bind, unbind, trigger
+  * DOM Traversing: parent, child
+  * DOM Manipulation: insert, remove, attr, html
+  * EVENTS: bind, free, trigger
  **/
 
 (function(window, document) {
@@ -43,28 +43,54 @@
 			return new Qj(selector, root);
 		}
 
-		extend(this, query(selector, root));
+		return extend(this, query(selector, root));
 	},
 
 	// Shortcuts, helpers, etc...
 	_Qj = window.Qj,
-	toString = Object.prototype.toString,
+	classTypeMap = [],
 	hasOwn = Object.prototype.hasOwnProperty,
-	push = Array.prototype.push,
 
 	/**
 	 * Selector
 	**/
 	query = function(selector, root) {
 		root = document.querySelector(root) || document;
+
 		return selector ? root.querySelectorAll(selector) : {};
 	},
 
 	/**
 	 * Core methods
 	**/
+	get = Qj.get = function (obj, idx) {
+		var i = idx || 0,
+			prop = obj && obj[i < 0 ? obj.length + i : i];
+
+		each(obj, function (val, key) {
+			delete obj[key];
+		});
+
+		if (prop) {
+			obj[0] = prop;
+			obj.length = 1;
+		}
+
+		return count(obj) ? obj : undefined;
+	},
+
+	count = Qj.count = function (obj) {
+		var count = 0;
+
+		each(obj, function () {
+			count++;
+		});
+
+		return count;
+	},
+
 	each = Qj.each = function (obj, fn, context) {
-		if (type(obj) === 'array') {
+		if (type(obj) === 'array' || obj instanceof Qj) {
 			for (var i = 0; i < obj.length; i++) {
 				fn.call(context, obj[i], i, obj);
 			}
@@ -79,52 +105,53 @@
 		return obj;
 	},
 
-	type = Qj.type = function(obj) {
-		return obj == null ?
-			String(obj) :
-			classTypeMap[toString.call(obj)] || 'oxbject';
+	type = Qj.type = function(val) {
+		return val == null ?
+			String(val) :
+			classTypeMap[Object.prototype.toString.call(val)] || 'object';
 	},
 
 	extend = Qj.extend = function(obj, src) {
 		each(src, function (val, key) {
-			obj[(type(obj) === 'array') ? obj.length : key] = val;
+			obj[key] = val;
 		});
 
 		return obj;
 	},
 
-	get = Qj.get = function (obj, idx) {
-		var i = idx || 0,
-			prop = String(i < 0 ? size(obj) + i : i);
-
-		each(obj, function (val, key, o) {
-			if (prop !== key) {
-				delete o[key];
+	merge = Qj.merge = function(obj, src) {
+		each(src, function (val, key) {
+			if (type(obj) === 'array') {
+				obj[obj.length] = val;
+			} else if (type(obj) === 'object' && !hasOwn.call(obj, key)) {
+				obj[key] = val;
 			}
 		});
 
-		obj.length = 1;
-
 		return obj;
-	},
-
-	now = Qj.now = function () {
-		// +new Date() is slow, see http://jsperf.com/posix-time
-		return (Date.now) ? Date.now() : new Date.getTime();
-	},
+	};
 
 	/**
 	 * CSS
 	**/
-	hasClass = Qj.hasClass = function(node, cssClass) {
-		return node && cssClass &&
-			!!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
-	},
+	Qj.prototype['hasClass'] = function(cssClass) {
+		var hasClass = function(node, cssClass) {
+			return node && cssClass &&
+				!!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
+		};
+
+		for (var node, i = 0; node = this[i]; i++) {
+			if (!hasClass(node, cssClass)) {
+				return false;
+			}
+		}
+
+		return true;
+	};
 
 	/**
-	 * Class to type map for Qj.type()
+	 * Class to type map to be used with Qj.type()
 	**/
-	classTypeMap = {};
 
 	each('Boolean Number String Function Array Date RegExp Object'.split(' '),
 		function(val) {
@@ -135,23 +162,21 @@
 	/**
 	 * Attach methods to Qj.prototype
 	**/
-	each('each type extend get now'.split(' '), function(val) {
-		Qj.prototype[val] = function () {
+	each('get count each extend'.split(' '), function(method) {
+		Qj.prototype[method] = function () {
 			var args = [this];
+			Array.prototype.push.apply(args, arguments)
 
-			push.apply(args, arguments);
-			return Qj[val].apply(this, args);
+			return Qj[method].apply(this, args);
 		};
 	});
 
-	Qj.prototype.hasClass = function(cssClass) {
-		for (var node, i = 0; node = this[i]; i++) {
-			if (!hasClass(node, cssClass)) {
-				return false;
-			}
-		}
-
-		return true;
+	/**
+	 * Get UNIX time
+	**/
+	Qj.now = function () {
+		// +new Date() is slow, see http://jsperf.com/posix-time
+		return (Date.now) ? Date.now() : new Date.getTime();
 	};
 
 	/**
