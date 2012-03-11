@@ -51,6 +51,7 @@
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push,
+
 	toArray = function (list) {
 		for (var arr = [], i = list.length >>> 0; i--;) {
 			arr[i] = list[i];
@@ -91,16 +92,16 @@
 
 	type = Qj.type = function(obj) {
 		return obj == null ?
-			String(obj) :
+			toString.call(obj) :
 			classTypeMap[toString.call(obj)] || 'object';
 	},
 
-	extend = Qj.extend = function(targ, src) {
+	extend = Qj.extend = function(obj, src) {
 		each(src, function (val, key) {
-			targ[(type(targ) === 'array') ? targ.length : key] = val;
+			obj[(type(obj) === 'array') ? obj.length : key] = val;
 		});
 
-		return targ;
+		return obj;
 	},
 
 	get = Qj.get = function (obj, idx) {
@@ -108,7 +109,7 @@
 			prop = (i < 0) ? size(obj) + i : i;
 
 		each(obj, function (val, key, o) {
-			if (String(prop) !== key) {
+			if (toString.call(prop) !== key) {
 				delete o[key];
 			}
 		});
@@ -124,6 +125,10 @@
 		});
 
 		return count;
+	},
+
+	now = Qj.now = function () {
+		return (Date.now) ? Date.now() : new Date.getTime();
 	},
 
 	/**
@@ -148,7 +153,7 @@
 	/**
 	 * Attach methods to Qj.prototype
 	**/
-	each('size get each extend type'.split(' '), function(val) {
+	each('each type extend get size now'.split(' '), function(val) {
 		Qj.prototype[val] = function () {
 			var args = [this];
 
@@ -159,12 +164,12 @@
 
 	Qj.prototype.hasClass = function(cssClass) {
 		for (var node, i = 0; node = this[i]; i++) {
-			if (hasClass(node, cssClass)) {
-				return true;
+			if (!hasClass(node, cssClass)) {
+				return false;
 			}
 		}
 
-		return false;
+		return true;
 	};
 
 	/**
