@@ -37,49 +37,48 @@
  **/
 
 (function(window, document) {
-	// Constructor
+	/**
+	 * Selector
+	**/
 	var Qj = function(selector, root) {
 		if (!(this instanceof Qj)) {
 			return new Qj(selector, root);
 		}
 
-		return extend(this, query(selector, root));
+		root = document.querySelector(root) || document;
+		selector = selector ? root.querySelectorAll(selector) : {};
+
+		return extend(this, selector);
 	},
 
 	// Shortcuts, helpers, etc...
 	_Qj = window.Qj,
 	classTypeMap = [],
+	Qjp = Qj.prototype,
+	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
-
-	/**
-	 * Selector
-	**/
-	query = function(selector, root) {
-		root = document.querySelector(root) || document;
-
-		return selector ? root.querySelectorAll(selector) : {};
-	},
+	push = Array.prototype.push;
 
 	/**
 	 * Core methods
 	**/
-	get = Qj.get = function (obj, idx) {
+	Qjp.get = function (idx) {
 		var i = idx || 0,
-			prop = obj && obj[i < 0 ? obj.length + i : i];
+			prop = this[i < 0 ? this.length + i : i];
 
-		each(obj, function (val, key) {
+		each(this, function (val, key, obj) {
 			delete obj[key];
 		});
 
 		if (prop) {
-			obj[0] = prop;
-			obj.length = 1;
+			this[0] = prop;
+			this.length = 1;
 		}
 
-		return count(obj) ? obj : undefined;
-	},
+		return count(this) ? this : undefined;
+	};
 
-	count = Qj.count = function (obj) {
+	var count = Qj.count = function (obj) {
 		var count = 0;
 
 		each(obj, function () {
@@ -108,7 +107,7 @@
 	type = Qj.type = function(val) {
 		return val == null ?
 			String(val) :
-			classTypeMap[Object.prototype.toString.call(val)] || 'object';
+			classTypeMap[toString.call(val)] || 'object';
 	},
 
 	extend = Qj.extend = function(obj, src) {
@@ -134,14 +133,14 @@
 	/**
 	 * CSS
 	**/
-	Qj.prototype['hasClass'] = function(cssClass) {
-		var hasClass = function(node, cssClass) {
+	Qjp.hasClass = function(cssClass) {
+		var checkClass = function(node, cssClass) {
 			return node && cssClass &&
 				!!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
 		};
 
 		for (var node, i = 0; node = this[i]; i++) {
-			if (!hasClass(node, cssClass)) {
+			if (!checkClass(node, cssClass)) {
 				return false;
 			}
 		}
@@ -152,7 +151,6 @@
 	/**
 	 * Class to type map to be used with Qj.type()
 	**/
-
 	each('Boolean Number String Function Array Date RegExp Object'.split(' '),
 		function(val) {
 			classTypeMap['[object ' + val + ']'] = val.toLowerCase();
@@ -160,12 +158,12 @@
 	);
 
 	/**
-	 * Attach methods to Qj.prototype
+	 * Attach selector-less methods to Qj.prototype via apply
 	**/
-	each('get count each extend'.split(' '), function(method) {
-		Qj.prototype[method] = function () {
+	each('count each extend'.split(' '), function(method) {
+		Qjp[method] = function () {
 			var args = [this];
-			Array.prototype.push.apply(args, arguments)
+			push.apply(args, arguments)
 
 			return Qj[method].apply(this, args);
 		};
@@ -175,7 +173,7 @@
 	 * Get UNIX time
 	**/
 	Qj.now = function () {
-		// +new Date() is slow, see http://jsperf.com/posix-time
+		// +new Date() is slow: http://jsperf.com/posix-time
 		return (Date.now) ? Date.now() : new Date.getTime();
 	};
 
