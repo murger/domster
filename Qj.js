@@ -73,23 +73,6 @@
 	/**
 	 * Core methods
 	**/
-	get = Qj.get = function (obj, idx) {
-		var i = idx || 0;
-
-		return obj[(i < 0) ? size(obj) + i : i];
-	},
-
-	size = Qj.size = function (obj) {
-		var count = 0;
-		for (var prop in obj) {
-			if (hasOwn.call(obj, prop)) {
-				count++;
-			}
-		}
-
-		return count;
-	},
-
 	each = Qj.each = function (obj, fn, context) {
 		if (type(obj) === 'array') {
 			for (var i = 0; i < obj.length; i++) {
@@ -106,36 +89,49 @@
 		return obj;
 	},
 
-	extend = Qj.extend = function(targ, src) {
-		if (type(src) === 'array') {
-			for (var i = 0; i < src.length; i++) {
-				if (type(targ) === 'array') {
-					targ[targ.length] = src[i];
-				} else {
-					targ[i] = src[i];
-				}
-			}
-		} else {
-			for (var prop in src) {
-				targ[prop] = src[prop];
-			}
-		}
-
-		return targ;
-	},
-
 	type = Qj.type = function(obj) {
 		return obj == null ?
 			String(obj) :
 			classTypeMap[toString.call(obj)] || 'object';
 	},
 
+	extend = Qj.extend = function(targ, src) {
+		each(src, function (val, key) {
+			targ[(type(targ) === 'array') ? targ.length : key] = val;
+		});
+
+		return targ;
+	},
+
+	get = Qj.get = function (obj, idx) {
+		var i = idx || 0,
+			prop = (i < 0) ? size(obj) + i : i;
+
+		each(obj, function (val, key, o) {
+			if (String(prop) !== key) {
+				delete o[key];
+			}
+		});
+
+		return obj;
+	},
+
+	size = Qj.size = function (obj) {
+		var count = 0;
+
+		each(obj, function () {
+			count++;
+		});
+
+		return count;
+	},
+
 	/**
 	 * CSS
 	**/
-	hasClass = Qj.hasClass = function(node, classStr) {
-		return node && classStr &&
-			!!~(' ' + node.className + ' ').indexOf(' ' + classStr + ' ');
+	hasClass = Qj.hasClass = function(node, cssClass) {
+		return node && cssClass &&
+			!!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
 	},
 
 	/**
@@ -155,6 +151,7 @@
 	each('size get each extend type'.split(' '), function(val) {
 		Qj.prototype[val] = function () {
 			var args = [this];
+
 			push.apply(args, arguments);
 			return Qj[val].apply(this, args);
 		};
