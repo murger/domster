@@ -52,23 +52,12 @@
 	hasOwn = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push,
 
-	toArray = function (list) {
-		for (var arr = [], i = list.length >>> 0; i--;) {
-			arr[i] = list[i];
-		}
-
-		return arr;
-	},
-
 	/**
 	 * Selector
 	**/
 	query = function(selector, root) {
 		root = document.querySelector(root) || document;
-
-		return selector ?
-			toArray(root.querySelectorAll(selector)) :
-			[];
+		return selector ? root.querySelectorAll(selector) : {};
 	},
 
 	/**
@@ -92,8 +81,8 @@
 
 	type = Qj.type = function(obj) {
 		return obj == null ?
-			toString.call(obj) :
-			classTypeMap[toString.call(obj)] || 'object';
+			String(obj) :
+			classTypeMap[toString.call(obj)] || 'oxbject';
 	},
 
 	extend = Qj.extend = function(obj, src) {
@@ -106,28 +95,21 @@
 
 	get = Qj.get = function (obj, idx) {
 		var i = idx || 0,
-			prop = (i < 0) ? size(obj) + i : i;
+			prop = String(i < 0 ? size(obj) + i : i);
 
 		each(obj, function (val, key, o) {
-			if (toString.call(prop) !== key) {
+			if (prop !== key) {
 				delete o[key];
 			}
 		});
 
+		obj.length = 1;
+
 		return obj;
 	},
 
-	size = Qj.size = function (obj) {
-		var count = 0;
-
-		each(obj, function () {
-			count++;
-		});
-
-		return count;
-	},
-
 	now = Qj.now = function () {
+		// +new Date() is slow, see http://jsperf.com/posix-time
 		return (Date.now) ? Date.now() : new Date.getTime();
 	},
 
@@ -153,7 +135,7 @@
 	/**
 	 * Attach methods to Qj.prototype
 	**/
-	each('each type extend get size now'.split(' '), function(val) {
+	each('each type extend get now'.split(' '), function(val) {
 		Qj.prototype[val] = function () {
 			var args = [this];
 
