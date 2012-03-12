@@ -38,13 +38,14 @@
 
 (function(window, document) {
 	/**
-	 * Selector
+	 * Constructor
 	**/
 	var Qj = function(selector, root) {
 		if (!(this instanceof Qj)) {
 			return new Qj(selector, root);
 		}
 
+		// Selector
 		root = document.querySelector(root) || document;
 		selector = selector ? root.querySelectorAll(selector) : {};
 
@@ -65,14 +66,13 @@
 	**/
 	prototype.get = function (idx) {
 		var i = idx || 0,
-			obj = null,
-			prop = this[i < 0 ? count(this) + i : i];
+			prop = i < 0 ? count(this) + i : i;
 
-		if (prop) {
-			obj = merge(Qj(), [prop]);
+		if (hasOwn.call(this, prop)) {
+			return merge(Qj(), [this[prop]]);
 		}
 
-		return obj ? obj : false;
+		return undefined;
 	};
 
 	var count = Qj.count = function (obj) {
