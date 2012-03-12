@@ -48,34 +48,31 @@
 		root = document.querySelector(root) || document;
 		selector = selector ? root.querySelectorAll(selector) : {};
 
-		return extend(this, selector);
+		delete selector.length;
+		return merge(this, selector);
 	},
 
 	// Shortcuts, helpers, etc...
 	_Qj = window.Qj,
 	classTypeMap = [],
-	Qjp = Qj.prototype,
+	prototype = Qj.prototype,
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push;
 
 	/**
-	 * Core methods
+	 * CORE
 	**/
-	Qjp.get = function (idx) {
+	prototype.get = function (idx) {
 		var i = idx || 0,
-			prop = this[i < 0 ? this.length + i : i];
-
-		each(this, function (val, key, obj) {
-			delete obj[key];
-		});
+			obj = null,
+			prop = this[i < 0 ? count(this) + i : i];
 
 		if (prop) {
-			this[0] = prop;
-			this.length = 1;
+			obj = merge(Qj(), [prop]);
 		}
 
-		return count(this) ? this : undefined;
+		return obj ? obj : false;
 	};
 
 	var count = Qj.count = function (obj) {
@@ -89,7 +86,7 @@
 	},
 
 	each = Qj.each = function (obj, fn, context) {
-		if (type(obj) === 'array' || obj instanceof Qj) {
+		if (type(obj) === 'array') {
 			for (var i = 0; i < obj.length; i++) {
 				fn.call(context, obj[i], i, obj);
 			}
@@ -104,13 +101,7 @@
 		return obj;
 	},
 
-	type = Qj.type = function(val) {
-		return val == null ?
-			String(val) :
-			classTypeMap[toString.call(val)] || 'object';
-	},
-
-	extend = Qj.extend = function(obj, src) {
+	merge = Qj.merge = function(obj, src) {
 		each(src, function (val, key) {
 			obj[key] = val;
 		});
@@ -118,22 +109,40 @@
 		return obj;
 	},
 
-	merge = Qj.merge = function(obj, src) {
+	extend = Qj.extend = function(obj, src) {
 		each(src, function (val, key) {
 			if (type(obj) === 'array') {
 				obj[obj.length] = val;
-			} else if (type(obj) === 'object' && !hasOwn.call(obj, key)) {
+			} else if (type(obj) === 'object') {
+				while (hasOwn.call(obj, key)) {
+					// Increment key for Qj objects, prefix it with _ for others
+					key = obj instanceof Qj ? count(obj) : '_' + key;
+				}
+
 				obj[key] = val;
 			}
 		});
 
 		return obj;
+	},
+
+	type = Qj.type = function(val) {
+		return val == null ?
+			String(val) :
+			classTypeMap[toString.call(val)] || 'object';
+	};
+
+	Qj.now = function () {
+		// +new Date() is slow: http://jsperf.com/posix-time
+		return (Date.now) ?
+			Date.now() :
+			new Date.getTime();
 	};
 
 	/**
 	 * CSS
 	**/
-	Qjp.hasClass = function(cssClass) {
+	prototype.hasClass = function(cssClass) {
 		var checkClass = function(node, cssClass) {
 			return node && cssClass &&
 				!!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
@@ -149,7 +158,7 @@
 	};
 
 	/**
-	 * Class to type map to be used with Qj.type()
+	 * Class to type map, utilised by Qj.type()
 	**/
 	each('Boolean Number String Function Array Date RegExp Object'.split(' '),
 		function(val) {
@@ -158,24 +167,16 @@
 	);
 
 	/**
-	 * Attach selector-less methods to Qj.prototype via apply
+	 * Add methods to Qj.prototype (Qj object self-apply)
 	**/
 	each('count each extend'.split(' '), function(method) {
-		Qjp[method] = function () {
+		prototype[method] = function () {
 			var args = [this];
-			push.apply(args, arguments)
+			push.apply(args, arguments);
 
 			return Qj[method].apply(this, args);
 		};
 	});
-
-	/**
-	 * Get UNIX time
-	**/
-	Qj.now = function () {
-		// +new Date() is slow: http://jsperf.com/posix-time
-		return (Date.now) ? Date.now() : new Date.getTime();
-	};
 
 	/**
 	 * Free up Qj and map it something else
