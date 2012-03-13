@@ -56,7 +56,6 @@
 	// Shortcuts, helpers, etc...
 	_Qj = window.Qj,
 	classTypeMap = [],
-	prototype = Qj.prototype,
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push;
@@ -64,7 +63,7 @@
 	/**
 	 * CORE
 	**/
-	prototype.get = function (idx) {
+	Qj.prototype.get = function (idx) {
 		var i = idx || 0,
 			prop = i < 0 ? count(this) + i : i;
 
@@ -85,15 +84,15 @@
 		return count;
 	},
 
-	each = Qj.each = function (obj, fn, context) {
+	each = Qj.each = function (obj, fn) {
 		if (type(obj) === 'array') {
 			for (var i = 0; i < obj.length; i++) {
-				fn.call(context, obj[i], i, obj);
+				fn.call(obj[i], obj[i], i, obj);
 			}
 		} else {
 			for (var prop in obj) {
 				if (hasOwn.call(obj, prop)) {
-					fn.call(context, obj[prop], prop, obj);
+					fn.call(obj[prop], obj[prop], prop, obj);
 				}
 			}
 		}
@@ -142,7 +141,7 @@
 	/**
 	 * CSS
 	**/
-	prototype.hasClass = function(cssClass) {
+	Qj.prototype.hasClass = function(cssClass) {
 		var checkClass = function(node, cssClass) {
 			return node && cssClass &&
 				!!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
@@ -170,10 +169,10 @@
 	 * Add methods to Qj.prototype (Qj object self-apply)
 	**/
 	each('count each extend'.split(' '), function(method) {
-		prototype[method] = function () {
+		Qj.prototype[method] = function () {
 			var args = [this];
-			push.apply(args, arguments);
 
+			push.apply(args, arguments);
 			return Qj[method].apply(this, args);
 		};
 	});
@@ -190,6 +189,9 @@
 
 		return Qj;
 	};
+
+	// Version info
+	Qj.v = '0.1.0-alpha';
 
 	// Expose Qj
 	window.Qj = Qj;
