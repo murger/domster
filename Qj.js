@@ -47,10 +47,10 @@
 
 		// Selector
 		root = document.querySelector(root) || document;
-		selector = selector ? root.querySelectorAll(selector) : {};
+		result = selector ? root.querySelectorAll(selector) : {};
 
-		delete selector.length;
-		return merge(this, selector);
+		delete result.length;
+		return (!result) ? this : merge(this, result);
 	},
 
 	// Shortcuts, helpers, etc...
@@ -58,7 +58,10 @@
 	classTypeMap = [],
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
-	push = Array.prototype.push;
+	push = Array.prototype.push,
+	isEnumerable = function (obj) {
+		return (type(obj) === 'array' || typeof obj === 'object');
+	};
 
 	/**
 	 * CORE
@@ -71,7 +74,7 @@
 			return merge(Qj(), [this[prop]]);
 		}
 
-		return undefined;
+		return;
 	};
 
 	var count = Qj.count = function (obj) {
@@ -85,11 +88,15 @@
 	},
 
 	each = Qj.each = function (obj, fn) {
+		if (!isEnumerable(obj) || typeof fn !== 'function') {
+			throw new TypeError();
+		}
+
 		if (type(obj) === 'array') {
 			for (var i = 0; i < obj.length; i++) {
 				fn.call(obj[i], obj[i], i, obj);
 			}
-		} else {
+		} else if (typeof obj === 'object') {
 			for (var prop in obj) {
 				if (hasOwn.call(obj, prop)) {
 					fn.call(obj[prop], obj[prop], prop, obj);
@@ -101,25 +108,22 @@
 	},
 
 	merge = Qj.merge = function(obj, src) {
-		each(src, function (val, key) {
-			obj[key] = val;
-		});
+		if (!isEnumerable(obj)) {
+			throw new TypeError();
+		}
 
-		return obj;
-	},
-
-	extend = Qj.extend = function(obj, src) {
 		each(src, function (val, key) {
 			if (type(obj) === 'array') {
-				obj[obj.length] = val;
-			} else if (type(obj) === 'object') {
-				while (hasOwn.call(obj, key)) {
-					// Increment key for Qj objects, prefix it with _ for others
-					key = obj instanceof Qj ? count(obj) : '_' + key;
+				key = obj.length;
+			} else if (typeof obj === 'object') {
+				if (obj instanceof Qj) {
+					key = count(obj);
+				} else if (hasOwn.call(obj, key)) {
+					return;
 				}
-
-				obj[key] = val;
 			}
+
+			obj[key] = val;
 		});
 
 		return obj;
@@ -166,9 +170,9 @@
 	);
 
 	/**
-	 * Add methods to Qj.prototype (Qj object self-apply)
+	 * Add some Qj.methods() as .methods(), so they can be used with the selector
 	**/
-	each('count each extend'.split(' '), function(method) {
+	each('count each merge'.split(' '), function(method) {
 		Qj.prototype[method] = function () {
 			var args = [this];
 
