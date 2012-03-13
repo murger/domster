@@ -87,19 +87,23 @@
 		return count;
 	},
 
-	each = Qj.each = function (obj, fn) {
+	each = Qj.each = function (obj, fn, context) {
 		if (!isEnumerable(obj) || typeof fn !== 'function') {
 			throw new TypeError();
 		}
 
+
 		if (type(obj) === 'array') {
 			for (var i = 0; i < obj.length; i++) {
-				fn.call(obj[i], obj[i], i, obj);
+				context = (!context) ? obj[i] : context;
+				fn.call(context, obj[i], i, obj);
 			}
 		} else if (typeof obj === 'object') {
+
 			for (var prop in obj) {
+				context = (!context) ? obj[prop] : context;
 				if (hasOwn.call(obj, prop)) {
-					fn.call(obj[prop], obj[prop], prop, obj);
+					fn.call(context, obj[prop], prop, obj);
 				}
 			}
 		}
@@ -146,18 +150,20 @@
 	 * CSS
 	**/
 	Qj.prototype.hasClass = function(cssClass) {
-		var checkClass = function(node, cssClass) {
-			return node && cssClass &&
-				!!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
-		};
-
-		for (var node, i = 0; node = this[i]; i++) {
-			if (!checkClass(node, cssClass)) {
-				return false;
-			}
+		if (type(cssClass) !== 'string') {
+			throw new TypeError();
 		}
 
-		return true;
+		var hasClass = [],
+			classExists = function (node) {
+				return !!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
+			}
+
+		each(this, function (node) {
+			hasClass[hasClass.length] = (!classExists(node)) ? false : true;
+		});
+
+		return hasClass.length > 1 ? hasClass : hasClass[0];
 	};
 
 	/**
