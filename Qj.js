@@ -1,5 +1,5 @@
 /**
- * Qj v0.1.0-alpha
+ * Qj v0.1.2-alpha
  * a light-weight JavaScript framework
  * http://github.com/murger/Qj/
  *
@@ -26,49 +26,78 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
-**/
-
- /**
-  * TODO
-  * CSS: addClass, removeClass, css
-  * DOM Traversing: parent, child
-  * DOM Manipulation: insert, remove, attr, html
-  * EVENTS: bind, free, trigger
- **/
+ *
+ * TODO
+ *
+ * CSS: addClass, removeClass, css
+ * DOM Traversing: parent, next, prev, filter?
+ * DOM Manipulation:
+ *		Qj.add({ id: 1, text 'blah', insertAfter: Qj('.box') }),
+ *		Qj(*).modify({ id: 2 }),
+ *		Qj(*).remove(),
+ *		Qj(*).attr({ data-price: '5' }),
+ *		Qj(*).attr('data-price')
+ *		Qj(*).data('price')
+ *		Qj(*).text('Lorem ipsum...') (createTextNode)
+ * EVENTS: bind, free, trigger
+ */
 
 (function(window, document) {
+	'use strict';
+
 	/**
-	 * Constructor
-	**/
-	var Qj = function(selector, root) {
+	 * Selector
+	 */
+	var Qj = function (selector, root) {
 		if (!(this instanceof Qj)) {
 			return new Qj(selector, root);
 		}
 
-		// Selector
-		root = document.querySelector(root) || document;
-		result = selector ? root.querySelectorAll(selector) : {};
+		// Qj() will be handled as an array-like object
+		this.length = 0;
 
-		delete result.length;
+		// Speed up .i() merge
+		if (!selector && !root) {
+			return this;
+		}
+
+		// Omitting root?
+		var parent = (root)
+			? document.querySelector(root)
+			: document;
+
+		// If parent's not found, there can't be a result
+		var result = (parent)
+			? parent.querySelectorAll(selector)
+			: false;
+
 		return (!result) ? this : merge(this, result);
 	},
 
-	// Shortcuts, helpers, etc...
+	// Shortcuts and helpers methods
 	_Qj = window.Qj,
 	classTypeMap = [],
+
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push,
-	isEnumerable = function (obj) {
-		return (type(obj) === 'array' || typeof obj === 'object');
+
+	isObj = function (obj) {
+		return (typeof obj === 'object')
+	},
+
+	isEnum = function (obj) {
+		return (type(obj) === 'array' || isObj(obj));
 	};
 
 	/**
 	 * CORE
-	**/
-	Qj.prototype.get = function (idx) {
+	 */
+	Qj.prototype.i = function (idx) {
 		var i = idx || 0,
-			prop = i < 0 ? count(this) + i : i;
+			prop = (i < 0)
+				? this.length + i
+				: i;
 
 		if (hasOwn.call(this, prop)) {
 			return merge(Qj(), [this[prop]]);
@@ -77,33 +106,20 @@
 		return;
 	};
 
-	var count = Qj.count = function (obj) {
-		var count = 0;
-
-		each(obj, function () {
-			count++;
-		});
-
-		return count;
-	},
-
-	each = Qj.each = function (obj, fn, context) {
-		if (!isEnumerable(obj) || typeof fn !== 'function') {
+	var each = Qj.each = function (obj, fn, context) {
+		if (!isEnum(obj) || typeof fn !== 'function') {
 			throw new TypeError();
 		}
 
-
-		if (type(obj) === 'array') {
+		if (type(obj) === 'array' || obj instanceof Qj) {
 			for (var i = 0; i < obj.length; i++) {
-				context = (!context) ? obj[i] : context;
-				fn.call(context, obj[i], i, obj);
+				fn.call((context ? context : obj[i]), obj[i], i, obj);
 			}
-		} else if (typeof obj === 'object') {
 
+		} else if (isObj(obj)) {
 			for (var prop in obj) {
-				context = (!context) ? obj[prop] : context;
 				if (hasOwn.call(obj, prop)) {
-					fn.call(context, obj[prop], prop, obj);
+					fn.call((context ? context : obj[prop]), obj[prop], prop, obj);
 				}
 			}
 		}
@@ -111,19 +127,23 @@
 		return obj;
 	},
 
-	merge = Qj.merge = function(obj, src) {
-		if (!isEnumerable(obj)) {
+	// Qj.merge([], {a:1}) –> converts object to an array
+	merge = Qj.merge = function (obj, src) {
+		if (!isEnum(obj)) {
 			throw new TypeError();
 		}
 
 		each(src, function (val, key) {
-			if (type(obj) === 'array') {
+			if (type(obj) === 'array' || obj instanceof Qj && !isNaN(key)) {
 				key = obj.length;
-			} else if (typeof obj === 'object') {
+
 				if (obj instanceof Qj) {
-					key = count(obj);
-				} else if (hasOwn.call(obj, key)) {
-					return;
+					obj.length++;
+				}
+
+			} else if (isObj(obj)) {
+				if (hasOwn.call(obj, key)) {
+					return; // continue
 				}
 			}
 
@@ -133,14 +153,14 @@
 		return obj;
 	},
 
-	type = Qj.type = function(val) {
+	type = Qj.type = function (val) {
 		return val == null ?
 			String(val) :
 			classTypeMap[toString.call(val)] || 'object';
 	};
 
 	Qj.now = function () {
-		// +new Date() is slow: http://jsperf.com/posix-time
+		// +new Date() is slow, see: http://jsperf.com/posix-time
 		return (Date.now) ?
 			Date.now() :
 			new Date.getTime();
@@ -148,27 +168,27 @@
 
 	/**
 	 * CSS
-	**/
-	Qj.prototype.hasClass = function(cssClass) {
+	 */
+	Qj.prototype.hasClass = function (cssClass) {
 		if (type(cssClass) !== 'string') {
 			throw new TypeError();
 		}
 
-		var hasClass = [],
+		var result = [],
 			classExists = function (node) {
 				return !!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
 			}
 
 		each(this, function (node) {
-			hasClass[hasClass.length] = (!classExists(node)) ? false : true;
+			result[result.length] = (!classExists(node)) ? false : true;
 		});
 
-		return hasClass.length > 1 ? hasClass : hasClass[0];
+		return result.length > 1 ? result : result[0];
 	};
 
 	/**
-	 * Class to type map, utilised by Qj.type()
-	**/
+	 * Class to type map utilised by Qj.type()
+	 */
 	each('Boolean Number String Function Array Date RegExp Object'.split(' '),
 		function(val) {
 			classTypeMap['[object ' + val + ']'] = val.toLowerCase();
@@ -176,9 +196,9 @@
 	);
 
 	/**
-	 * Add some Qj.methods() as .methods(), so they can be used with the selector
-	**/
-	each('count each merge'.split(' '), function(method) {
+	 * Add some Qj.methods() to prototype
+	 */
+	each('each merge'.split(' '), function(method) {
 		Qj.prototype[method] = function () {
 			var args = [this];
 
@@ -189,20 +209,24 @@
 
 	/**
 	 * Free up Qj and map it something else
-	**/
+	 */
 	Qj.mapAlias = function () {
-		if (!_Qj && window.Qj) {
+		if (window.Qj() instanceof Qj) {
 			delete window.Qj;
-		} else {
+		}
+
+		if (_Qj) {
 			window.Qj = _Qj;
+			_Qj = false;
 		}
 
 		return Qj;
 	};
 
 	// Version info
-	Qj.v = '0.1.0-alpha';
+	Qj.v = '0.1.2-alpha';
 
 	// Expose Qj
 	window.Qj = Qj;
+
 })(this, this.document);
