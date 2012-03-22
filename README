@@ -7,3 +7,4 @@ Priorities:
 2. Small footprint
 
 Browser compatibility: http://caniuse.com/queryselector
+Performance comparison: http://jsperf.com/qj-vs-jquery/3
