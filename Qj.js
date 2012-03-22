@@ -30,16 +30,24 @@
  * TODO
  *
  * CSS: addClass, removeClass, css
- * DOM Traversing: parent, next, prev, filter?
- * DOM Manipulation:
- *		Qj.add({ id: 1, text 'blah', insertAfter: Qj('.box') }),
- *		Qj(*).modify({ id: 2 }),
- *		Qj(*).remove(),
- *		Qj(*).attr({ data-price: '5' }),
- *		Qj(*).attr('data-price')
- *		Qj(*).data('price')
- *		Qj(*).text('Lorem ipsum...') (createTextNode)
  * EVENTS: bind, free, trigger
+ * DOM Traversal
+ *		Qj(*).parent()
+ *		Qj(*).children()
+ *		Qj(*).children('#modal')
+ *		Qj(*).siblings()
+ *		Qj(*).next()
+ *		Qj(*).prev()
+ *		Qj(*).filter(function (i) { return true; })
+ *		-> i(0), i(-1) as first() and last()
+ * DOM Manipulation
+ *		Qj.create('div', { id: 1, class: ['button'], text 'blah', insertBefore: '.box' })
+ *		Qj(*).text('meh.')
+ *		Qj(*).attr('title')
+ *		Qj(*).attr({ src: 'image.jpg' })
+ *		Qj(*).data('price')
+ *		Qj(*).data('price', { name: 'bob' })
+ *		Qj(*).remove()
  */
 
 (function(window, document) {
@@ -53,34 +61,103 @@
 			return new Qj(selector, root);
 		}
 
-		// Qj() will be handled as an array-like object
-		this.length = 0;
-
-		// Speed up .i() merge
 		if (!selector && !root) {
 			return this;
 		}
 
-		// Omitting root?
-		var parent = (root)
-			? document.querySelector(root)
-			: document;
-
-		// If parent's not found, there can't be a result
-		var result = (parent)
-			? parent.querySelectorAll(selector)
-			: false;
-
-		return (!result) ? this : merge(this, result);
+		this.nodes = select(selector, root);
 	},
 
-	// Shortcuts and helpers methods
+	getByClass = (function () {
+		if (typeof document.getElementsByClassName === 'function') {
+			return document.getElementsByClassName;
+		}
+
+		// getElementsByClassName polyfill
+		return function (cssClass) {
+			var nodes = (this === document)
+					? document.body.children
+					: this.children,
+				push = Array.prototype.push,
+				result = [],
+				i = 0, j = 0,
+				n, c,
+
+				hasChildren = function (node) {
+					return (node.children && node.children.length);
+				},
+
+				filterNodeByClass = function (node) {
+					if (elHasClass(node, cssClass)) {
+						push.call(result, node);
+					}
+				};
+
+			while (n = nodes[i++]) {
+				filterNodeByClass(n);
+
+				if (hasChildren(n)) {
+					j = 0;
+
+					while (c = n.children[j++]) {
+						if (hasChildren(c)) {
+							push.call(nodes, c);
+						} else {
+							filterNodeByClass(c);
+						}
+					}
+				}
+			}
+
+			return result;
+		};
+	})(),
+
+	select = function (selector, root) {
+		var root = (root) ? select(root)[0] : document,
+			found,
+			result = [];
+
+		// ID
+		if (found = /^#([\w\-]+)$/.exec(selector)) {
+			return (result = root.getElementById(found[1]))
+				? [result]
+				: [];
+		}
+
+		// [1] just tag, [2] tag when class, [3] class
+		found = /^(?:([\w]+)|([\w]+)?\.([\w\-]+))$/.exec(selector);
+
+		// Just tag
+		if (found[1]) {
+			return root.getElementsByTagName(found[1]);
+		}
+
+		// Just class
+		if (!found[2]) {
+			return getByClass.call(root, found[3]);
+		}
+
+		// Tag and class
+		;
+
+		for (var i = 0, nodes = getByClass.call(root, found[3]); i < nodes.length; i++) {
+			if (nodes[i].nodeName === found[2].toUpperCase()) {
+				result.push(nodes[i]);
+			}
+		}
+
+		return result;
+	},
+
+	// Shortcuts and helper methods
 	_Qj = window.Qj,
 	classTypeMap = [],
 
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push,
+	splice = Array.prototype.splice,
 
 	isObj = function (obj) {
 		return (typeof obj === 'object')
@@ -88,34 +165,40 @@
 
 	isEnum = function (obj) {
 		return (type(obj) === 'array' || isObj(obj));
+	},
+
+	isElement = function (node) {
+		return (node.nodeType === 1);
 	};
 
 	/**
 	 * CORE
 	 */
+	Qj.prototype.nodes = [];
+
 	Qj.prototype.i = function (idx) {
 		var i = idx || 0,
-			prop = (i < 0)
-				? this.length + i
+			n = (i < 0)
+				? this.nodes.length + i
 				: i;
 
-		if (hasOwn.call(this, prop)) {
-			return merge(Qj(), [this[prop]]);
-		}
+		this.nodes = [this.nodes[n]];
 
-		return;
+		return this;
+	};
+
+	Qj.now = function () {
+		// +new Date() is slow, see: http://jsperf.com/posix-time
+		return (Date.now)
+			? Date.now()
+			: new Date.getTime();
 	};
 
 	var each = Qj.each = function (obj, fn, context) {
-		if (!isEnum(obj) || typeof fn !== 'function') {
-			throw new TypeError();
-		}
-
-		if (type(obj) === 'array' || obj instanceof Qj) {
+		if (type(obj) === 'array' || type(obj) === 'nodelist') {
 			for (var i = 0; i < obj.length; i++) {
 				fn.call((context ? context : obj[i]), obj[i], i, obj);
 			}
-
 		} else if (isObj(obj)) {
 			for (var prop in obj) {
 				if (hasOwn.call(obj, prop)) {
@@ -129,18 +212,13 @@
 
 	// Qj.merge([], {a:1}) –> converts object to an array
 	merge = Qj.merge = function (obj, src) {
-		if (!isEnum(obj)) {
-			throw new TypeError();
-		}
-
 		each(src, function (val, key) {
-			if (type(obj) === 'array' || obj instanceof Qj && !isNaN(key)) {
+			if (type(obj) === 'array' || type(obj) === 'nodelist') {
 				key = obj.length;
 
 				if (obj instanceof Qj) {
 					obj.length++;
 				}
-
 			} else if (isObj(obj)) {
 				if (hasOwn.call(obj, key)) {
 					return; // continue
@@ -154,42 +232,36 @@
 	},
 
 	type = Qj.type = function (val) {
-		return val == null ?
-			String(val) :
-			classTypeMap[toString.call(val)] || 'object';
-	};
-
-	Qj.now = function () {
-		// +new Date() is slow, see: http://jsperf.com/posix-time
-		return (Date.now) ?
-			Date.now() :
-			new Date.getTime();
+		return (!val)
+			? String(val)
+			: classTypeMap[toString.call(val)] || 'object';
 	};
 
 	/**
 	 * CSS
 	 */
+	var elHasClass = function (node, cssClass) {
+		return !!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
+	};
+
 	Qj.prototype.hasClass = function (cssClass) {
-		if (type(cssClass) !== 'string') {
-			throw new TypeError();
-		}
+		var result = [];
 
-		var result = [],
-			classExists = function (node) {
-				return !!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
-			}
-
-		each(this, function (node) {
-			result[result.length] = (!classExists(node)) ? false : true;
+		each(this.nodes, function (node) {
+			result[result.length] = (elHasClass(node, cssClass))
+				? true
+				: false;
 		});
 
-		return result.length > 1 ? result : result[0];
+		return (result.length > 1)
+			? result
+			: result[0];
 	};
 
 	/**
 	 * Class to type map utilised by Qj.type()
 	 */
-	each('Boolean Number String Function Array Date RegExp Object'.split(' '),
+	each('Boolean Number String Function Array Date RegExp NodeList Object'.split(' '),
 		function(val) {
 			classTypeMap['[object ' + val + ']'] = val.toLowerCase();
 		}
