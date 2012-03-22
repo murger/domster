@@ -1,10 +1,8 @@
-Qj.js
-v0.1.0-alpha
+Qj v0.1.3
 a light-weight JavaScript framework
 
 Priorities:
 1. Performance
 2. Small footprint
 
-Browser compatibility: http://caniuse.com/queryselector
 Performance comparison: http://jsperf.com/qj-vs-jquery/3

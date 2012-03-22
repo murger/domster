@@ -1,5 +1,5 @@
 /**
- * Qj v0.1.2-alpha
+ * Qj v0.1.3
  * a light-weight JavaScript framework
  * http://github.com/murger/Qj/
  *
@@ -296,7 +296,7 @@
 	};
 
 	// Version info
-	Qj.v = '0.1.2-alpha';
+	Qj.v = '0.1.3';
 
 	// Expose Qj
 	window.Qj = Qj;
