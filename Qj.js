@@ -54,7 +54,7 @@
 	'use strict';
 
 	/**
-	 * Selector
+	 * CONSTRUCTOR
 	 */
 	var Qj = function (selector, root) {
 		if (!(this instanceof Qj)) {
@@ -68,20 +68,27 @@
 		this.nodes = select(selector, root);
 	},
 
+	// Shortcuts, helpers, etc...
+	_Qj = window.Qj,
+	classTypeMap = [],
+
+	toString = Object.prototype.toString,
+	hasOwn = Object.prototype.hasOwnProperty,
+	push = Array.prototype.push,
+
+	// getElementsByClassName polyfill
 	getByClass = (function () {
 		if (typeof document.getElementsByClassName === 'function') {
 			return document.getElementsByClassName;
 		}
 
-		// getElementsByClassName polyfill
 		return function (cssClass) {
 			var nodes = (this === document)
 					? document.body.children
 					: this.children,
-				push = Array.prototype.push,
-				result = [],
-				i = 0, j = 0,
 				n, c,
+				i = 0, j = 0,
+				result = [],
 
 				hasChildren = function (node) {
 					return (node.children && node.children.length);
@@ -93,6 +100,7 @@
 					}
 				};
 
+			// TODO: Optimise this loop
 			while (n = nodes[i++]) {
 				filterNodeByClass(n);
 
@@ -113,6 +121,7 @@
 		};
 	})(),
 
+	// Selector
 	select = function (selector, root) {
 		var root = (root) ? select(root)[0] : document,
 			found,
@@ -139,9 +148,9 @@
 		}
 
 		// Tag and class
-		;
+		nodes = getByClass.call(root, found[3])
 
-		for (var i = 0, nodes = getByClass.call(root, found[3]); i < nodes.length; i++) {
+		for (var i = 0, len = nodes.length; i < len; i++) {
 			if (nodes[i].nodeName === found[2].toUpperCase()) {
 				result.push(nodes[i]);
 			}
@@ -149,15 +158,6 @@
 
 		return result;
 	},
-
-	// Shortcuts and helper methods
-	_Qj = window.Qj,
-	classTypeMap = [],
-
-	toString = Object.prototype.toString,
-	hasOwn = Object.prototype.hasOwnProperty,
-	push = Array.prototype.push,
-	splice = Array.prototype.splice,
 
 	isObj = function (obj) {
 		return (typeof obj === 'object')
@@ -169,40 +169,31 @@
 
 	isElement = function (node) {
 		return (node.nodeType === 1);
-	};
+	},
 
-	/**
-	 * CORE
-	 */
-	Qj.prototype.nodes = [];
+	elHasClass = function (node, cssClass) {
+		return !!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
+	},
 
-	Qj.prototype.i = function (idx) {
-		var i = idx || 0,
-			n = (i < 0)
-				? this.nodes.length + i
-				: i;
+	each = function (obj, fn, context) {
+		if (obj instanceof Qj) {
+			if (obj.nodes && obj.nodes.length) {
+				obj = obj.nodes;
+			} else {
+				return obj;
+			}
+		}
 
-		this.nodes = [this.nodes[n]];
-
-		return this;
-	};
-
-	Qj.now = function () {
-		// +new Date() is slow, see: http://jsperf.com/posix-time
-		return (Date.now)
-			? Date.now()
-			: new Date.getTime();
-	};
-
-	var each = Qj.each = function (obj, fn, context) {
 		if (type(obj) === 'array' || type(obj) === 'nodelist') {
 			for (var i = 0; i < obj.length; i++) {
-				fn.call((context ? context : obj[i]), obj[i], i, obj);
+				context || (context = obj[i]);
+				fn.call(context, obj[i], i, obj);
 			}
 		} else if (isObj(obj)) {
 			for (var prop in obj) {
 				if (hasOwn.call(obj, prop)) {
-					fn.call((context ? context : obj[prop]), obj[prop], prop, obj);
+					context || (context = obj[prop]);
+					fn.call(context, obj[prop], prop, obj);
 				}
 			}
 		}
@@ -210,17 +201,14 @@
 		return obj;
 	},
 
-	// Qj.merge([], {a:1}) –> converts object to an array
-	merge = Qj.merge = function (obj, src) {
+	extend = function (obj, src, overwrite) {
 		each(src, function (val, key) {
 			if (type(obj) === 'array' || type(obj) === 'nodelist') {
-				key = obj.length;
-
-				if (obj instanceof Qj) {
-					obj.length++;
-				}
-			} else if (isObj(obj)) {
-				if (hasOwn.call(obj, key)) {
+				key = (!overwrite)
+					? obj.length
+					: key;
+			} else if (isObj(obj) || typeof obj === 'function') {
+				if (!overwrite && hasOwn.call(obj, key)) {
 					return; // continue
 				}
 			}
@@ -231,36 +219,20 @@
 		return obj;
 	},
 
-	type = Qj.type = function (val) {
+	attach = function (obj, method, args) {
+		var a = [obj];
+
+		push.apply(a, args);
+		return Qj[method].apply(obj, a);
+	},
+
+	type = function (val) {
 		return (!val)
 			? String(val)
 			: classTypeMap[toString.call(val)] || 'object';
 	};
 
-	/**
-	 * CSS
-	 */
-	var elHasClass = function (node, cssClass) {
-		return !!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
-	};
-
-	Qj.prototype.hasClass = function (cssClass) {
-		var result = [];
-
-		each(this.nodes, function (node) {
-			result[result.length] = (elHasClass(node, cssClass))
-				? true
-				: false;
-		});
-
-		return (result.length > 1)
-			? result
-			: result[0];
-	};
-
-	/**
-	 * Class to type map utilised by Qj.type()
-	 */
+	// Build class to type map
 	each('Boolean Number String Function Array Date RegExp NodeList Object'.split(' '),
 		function(val) {
 			classTypeMap['[object ' + val + ']'] = val.toLowerCase();
@@ -268,19 +240,70 @@
 	);
 
 	/**
-	 * Add some Qj.methods() to prototype
+	 * HELPERS
 	 */
-	each('each merge'.split(' '), function(method) {
-		Qj.prototype[method] = function () {
-			var args = [this];
+	extend(Qj, {
+		each: each,
+		extend: extend,
+		type: type,
 
-			push.apply(args, arguments);
-			return Qj[method].apply(this, args);
-		};
+		// '+new Date()' is slow, see: http://jsperf.com/posix-time
+		now: function () {
+			return (Date.now)
+				? Date.now()
+				: new Date.getTime();
+		}
 	});
 
 	/**
-	 * Free up Qj and map it something else
+	 * DOM
+	 */
+	extend(Qj.prototype, {
+		nodes: [],
+
+		count: function () {
+			return (this.nodes && this.nodes.length)
+				? this.nodes.length
+				: 0;
+		},
+
+		i: function (idx) {
+			var i = idx || 0,
+				n = (i < 0)
+					? this.nodes.length + i
+					: i;
+
+			this.nodes = [this.nodes[n]];
+
+			return this;
+		},
+
+		each: function () {
+			return attach(this, 'each', arguments);
+		}
+	});
+
+	/**
+	 * CSS
+	 */
+	extend(Qj.prototype, {
+		hasClass: function (cssClass) {
+			var result = [];
+
+			each(this.nodes, function (node) {
+				result[result.length] = (elHasClass(node, cssClass))
+					? true
+					: false;
+			});
+
+			return (result.length > 1)
+				? result
+				: result[0];
+		}
+	});
+
+	/**
+	 * Free up Qj and map it to something else
 	 */
 	Qj.mapAlias = function () {
 		if (window.Qj() instanceof Qj) {
