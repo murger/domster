@@ -1,8 +1,4 @@
-Qj v0.1.3
-a light-weight JavaScript framework
+Qj v0.1.4
+a light-weight JavaScript framework optimised for performance and small foot print
 
-Priorities:
-1. Performance
-2. Small footprint
-
-Performance comparison: http://jsperf.com/qj-vs-jquery/3
+Performance comparisons: http://jsperf.com/qj-vs-jquery/3

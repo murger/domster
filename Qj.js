@@ -1,5 +1,5 @@
 /**
- * Qj v0.1.3
+ * Qj v0.1.4
  * a light-weight JavaScript framework
  * http://github.com/murger/Qj/
  *
@@ -29,8 +29,8 @@
  *
  * TODO
  *
- * CSS: addClass, removeClass, css
- * EVENTS: bind, free, trigger
+ * CSS: Qj(*).addClass, Qj(*).removeClass, Qj(*).css({})
+ * EVENTS: Qj(*).bind(), Qj(*).free(), Qj(*).trigger()
  * DOM Traversal
  *		Qj(*).parent()
  *		Qj(*).children()
@@ -48,6 +48,7 @@
  *		Qj(*).data('price')
  *		Qj(*).data('price', { name: 'bob' })
  *		Qj(*).remove()
+ * XHR: Qj.request()
  */
 
 (function(window, document) {
@@ -62,95 +63,95 @@
 		}
 
 		if (!selector && !root) {
-			return this;
+			throw new TypeError();
 		}
 
 		this.nodes = select(selector, root);
 	},
 
-	// Shortcuts, helpers, etc...
+	// Shortcuts
 	_Qj = window.Qj,
-	classTypeMap = [],
-
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
-	push = Array.prototype.push,
+	push = Array.prototype.push;
 
-	// getElementsByClassName polyfill
-	getByClass = (function () {
-		if (typeof document.getElementsByClassName === 'function') {
-			return document.getElementsByClassName;
+	// getElementsByClassName polyfill, mainly for IE8
+	var getByClass = (typeof document.getElementsByClassName === 'function')
+		? function (cssClass) {
+			return this.getElementsByClassName(cssClass);
 		}
 
-		return function (cssClass) {
-			var nodes = (this === document)
-					? document.body.children
-					: this.children,
-				n, c,
-				i = 0, j = 0,
+		: function (cssClass) {
+			var i, j,
+				node, child,
 				result = [],
 
-				hasChildren = function (node) {
-					return (node.children && node.children.length);
+				collection = (this === document)
+					? document.body.children
+					: this.children,
+
+				hasChildren = function (n) {
+					return (n.children && n.children.length);
 				},
 
-				filterNodeByClass = function (node) {
-					if (elHasClass(node, cssClass)) {
-						push.call(result, node);
-					}
+				pickNodeByClass = function (n) {
+					return hasClass(n, cssClass) && result.push(n);
 				};
 
-			// TODO: Optimise this loop
-			while (n = nodes[i++]) {
-				filterNodeByClass(n);
+			for (i = 0; node = collection[i]; i++) {
+				pickNodeByClass(node);
 
-				if (hasChildren(n)) {
-					j = 0;
-
-					while (c = n.children[j++]) {
-						if (hasChildren(c)) {
-							push.call(nodes, c);
-						} else {
-							filterNodeByClass(c);
-						}
+				if (hasChildren(node)) {
+					for (j = 0; child = node.children[j]; j++) {
+						(hasChildren(child) && push.call(collection, child))
+							|| pickNodeByClass(child);
 					}
 				}
 			}
 
 			return result;
 		};
-	})(),
 
 	// Selector
-	select = function (selector, root) {
-		var root = (root) ? select(root)[0] : document,
-			found,
+	var select = function (selector, root) {
+		root = (root)
+			? select(root)[0]
+			: document;
+
+		if (!root) {
+			throw new TypeError();
+		}
+
+		var found,
 			result = [];
 
-		// ID
+		// #id
 		if (found = /^#([\w\-]+)$/.exec(selector)) {
 			return (result = root.getElementById(found[1]))
 				? [result]
 				: [];
 		}
 
-		// [1] just tag, [2] tag when class, [3] class
+		// [1] -> <tag>
+		// [2] -> <tag> (if .class)
+		// [3] -> .class
 		found = /^(?:([\w]+)|([\w]+)?\.([\w\-]+))$/.exec(selector);
 
-		// Just tag
+		// only <tag>
 		if (found[1]) {
 			return root.getElementsByTagName(found[1]);
 		}
 
-		// Just class
+		// only .class
 		if (!found[2]) {
 			return getByClass.call(root, found[3]);
 		}
 
-		// Tag and class
-		nodes = getByClass.call(root, found[3])
+		// <tag> & .class
+		var nodes = getByClass.call(root, found[3])
+			i, len;
 
-		for (var i = 0, len = nodes.length; i < len; i++) {
+		for (i = 0, len = nodes.length; i < len; i++) {
 			if (nodes[i].nodeName === found[2].toUpperCase()) {
 				result.push(nodes[i]);
 			}
@@ -159,19 +160,20 @@
 		return result;
 	},
 
+	// Helper methods
 	isObj = function (obj) {
-		return (typeof obj === 'object')
+		return (typeof obj === 'object');
 	},
 
 	isEnum = function (obj) {
-		return (type(obj) === 'array' || isObj(obj));
+		return (type(obj) === 'array' || type(obj) === 'nodelist');
 	},
 
 	isElement = function (node) {
 		return (node.nodeType === 1);
 	},
 
-	elHasClass = function (node, cssClass) {
+	hasClass = function (node, cssClass) {
 		return !!~(' ' + node.className + ' ').indexOf(' ' + cssClass + ' ');
 	},
 
@@ -184,11 +186,12 @@
 			}
 		}
 
-		if (type(obj) === 'array' || type(obj) === 'nodelist') {
+		if (isEnum(obj)) {
 			for (var i = 0; i < obj.length; i++) {
 				context || (context = obj[i]);
 				fn.call(context, obj[i], i, obj);
 			}
+
 		} else if (isObj(obj)) {
 			for (var prop in obj) {
 				if (hasOwn.call(obj, prop)) {
@@ -201,12 +204,13 @@
 		return obj;
 	},
 
-	extend = function (obj, src, overwrite) {
-		each(src, function (val, key) {
-			if (type(obj) === 'array' || type(obj) === 'nodelist') {
+	extend = function (obj, add, overwrite) {
+		each(add, function (val, key) {
+			if (isEnum(obj)) {
 				key = (!overwrite)
 					? obj.length
 					: key;
+
 			} else if (isObj(obj) || typeof obj === 'function') {
 				if (!overwrite && hasOwn.call(obj, key)) {
 					return; // continue
@@ -219,36 +223,30 @@
 		return obj;
 	},
 
-	attach = function (obj, method, args) {
-		var a = [obj];
-
-		push.apply(a, args);
-		return Qj[method].apply(obj, a);
-	},
-
 	type = function (val) {
 		return (!val)
 			? String(val)
 			: classTypeMap[toString.call(val)] || 'object';
-	};
+	},
 
-	// Build class to type map
-	each('Boolean Number String Function Array Date RegExp NodeList Object'.split(' '),
-		function(val) {
-			classTypeMap['[object ' + val + ']'] = val.toLowerCase();
-		}
-	);
+	// Map classes to lowercase types
+	classTypeMap = [],
+	types = 'Boolean Number String Function Array Date RegExp NodeList Object';
+
+	each(types.split(' '), function(val) {
+		classTypeMap['[object ' + val + ']'] = val.toLowerCase();
+	});
 
 	/**
-	 * HELPERS
+	 * UTILITY
 	 */
 	extend(Qj, {
 		each: each,
 		extend: extend,
 		type: type,
 
-		// '+new Date()' is slow, see: http://jsperf.com/posix-time
 		now: function () {
+			// '+new Date()' is slow, see: http://jsperf.com/posix-time
 			return (Date.now)
 				? Date.now()
 				: new Date.getTime();
@@ -279,7 +277,10 @@
 		},
 
 		each: function () {
-			return attach(this, 'each', arguments);
+			var a = [this];
+			push.apply(a, arguments);
+
+			return each.apply(this, a);
 		}
 	});
 
@@ -291,9 +292,7 @@
 			var result = [];
 
 			each(this.nodes, function (node) {
-				result[result.length] = (elHasClass(node, cssClass))
-					? true
-					: false;
+				result.push(hasClass(node, cssClass) ? true : false);
 			});
 
 			return (result.length > 1)
@@ -303,7 +302,7 @@
 	});
 
 	/**
-	 * Free up Qj and map it to something else
+	 * Free Qj and re-map
 	 */
 	Qj.mapAlias = function () {
 		if (window.Qj() instanceof Qj) {
@@ -312,14 +311,14 @@
 
 		if (_Qj) {
 			window.Qj = _Qj;
-			_Qj = false;
+			_Qj = undefined;
 		}
 
 		return Qj;
 	};
 
 	// Version info
-	Qj.v = '0.1.3';
+	Qj.v = '0.1.4';
 
 	// Expose Qj
 	window.Qj = Qj;
