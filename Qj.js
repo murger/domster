@@ -62,21 +62,23 @@
 			return new Qj(selector, root);
 		}
 
-		if (!selector && !root) {
-			throw new TypeError();
+		if (selector) {
+			this.nodes = select(selector, root);
 		}
-
-		this.nodes = select(selector, root);
 	},
 
-	// Shortcuts
+	/**
+	 * SHORTCUTS
+	 */
 	_Qj = window.Qj,
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
-	push = Array.prototype.push;
+	push = Array.prototype.push,
 
-	// getElementsByClassName polyfill, mainly for IE8
-	var getByClass = (typeof document.getElementsByClassName === 'function')
+	/**
+	 * getElementsByClassName POLYFILL (for IE8)
+	 */
+	getByClass = (typeof document.getElementsByClassName === 'function')
 		? function (cssClass) {
 			return this.getElementsByClassName(cssClass);
 		}
@@ -86,17 +88,17 @@
 				node, child,
 				result = [],
 
-				collection = (this === document)
-					? document.body.children
-					: this.children,
-
 				hasChildren = function (n) {
 					return (n.children && n.children.length);
 				},
 
 				pickNodeByClass = function (n) {
 					return hasClass(n, cssClass) && result.push(n);
-				};
+				},
+
+				collection = (this === document)
+					? document.body.children
+					: this.children;
 
 			for (i = 0; node = collection[i]; i++) {
 				pickNodeByClass(node);
@@ -112,7 +114,9 @@
 			return result;
 		};
 
-	// Selector
+	/**
+	 * SELECTOR
+	 */
 	var select = function (selector, root) {
 		root = (root)
 			? select(root)[0]
@@ -160,7 +164,9 @@
 		return result;
 	},
 
-	// Helper methods
+	/**
+	 * HELPERS
+	 */
 	isObj = function (obj) {
 		return (typeof obj === 'object');
 	},
@@ -211,6 +217,7 @@
 					? obj.length
 					: key;
 
+			// typeof Qj -> function
 			} else if (isObj(obj) || typeof obj === 'function') {
 				if (!overwrite && hasOwn.call(obj, key)) {
 					return; // continue
@@ -238,7 +245,7 @@
 	});
 
 	/**
-	 * UTILITY
+	 * UTILS
 	 */
 	extend(Qj, {
 		each: each,
@@ -250,6 +257,19 @@
 			return (Date.now)
 				? Date.now()
 				: new Date.getTime();
+		},
+
+		remap: function () {
+			if (window.Qj() instanceof this) {
+				delete window.Qj;
+			}
+
+			if (_Qj) {
+				window.Qj = _Qj;
+				_Qj = undefined;
+			}
+
+			return this;
 		}
 	});
 
@@ -277,6 +297,7 @@
 		},
 
 		each: function () {
+			// augment 'this' as the first argument
 			var a = [this];
 			push.apply(a, arguments);
 
@@ -302,25 +323,9 @@
 	});
 
 	/**
-	 * Free Qj and re-map
+	 * VERSIONING & EXPOSURE
 	 */
-	Qj.mapAlias = function () {
-		if (window.Qj() instanceof Qj) {
-			delete window.Qj;
-		}
-
-		if (_Qj) {
-			window.Qj = _Qj;
-			_Qj = undefined;
-		}
-
-		return Qj;
-	};
-
-	// Version info
 	Qj.v = '0.1.4';
-
-	// Expose Qj
 	window.Qj = Qj;
 
 })(this, this.document);
