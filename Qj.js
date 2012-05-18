@@ -26,10 +26,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ */
+
+/**
+ * ROADMAP
  *
- * TODO
- *
- * CSS: Qj(*).addClass, Qj(*).removeClass, Qj(*).css({})
+ * CSS: Qj(*).addClass, Qj(*).removeClass, Qj(*).style({ 'color': 'red' })
  * EVENTS: Qj(*).bind(), Qj(*).free(), Qj(*).trigger()
  * DOM Traversal
  *		Qj(*).parent()
@@ -38,11 +40,16 @@
  *		Qj(*).siblings()
  *		Qj(*).next()
  *		Qj(*).prev()
- *		Qj(*).filter(function (i) { return true; })
+ *		Qj(*).filter(function (i) { return i % 2; })
  *		-> i(0), i(-1) as first() and last()
  * DOM Manipulation
- *		Qj.create('div', { id: 1, class: ['button'], text 'blah', insertBefore: '.box' })
- *		Qj(*).text('meh.')
+ *		Qj.create('div', {
+ *			id: 'pause',
+ *			class: ['blue', 'red'],
+ *			content: '...',
+ *		}).insert({ : '.box') // make use of createDocumentFragment
+ *
+ *		Qj(*).content('meh.')
  *		Qj(*).attr('title')
  *		Qj(*).attr({ src: 'image.jpg' })
  *		Qj(*).data('price')
@@ -51,7 +58,7 @@
  * XHR: Qj.request()
  */
 
-(function(window, document) {
+(function (window, document) {
 	'use strict';
 
 	/**
@@ -71,29 +78,37 @@
 	 * SHORTCUTS
 	 */
 	_Qj = window.Qj,
+	guid = Math.random() * 9e17,
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push,
+	trim = String.prototype.trim,
 
 	/**
 	 * getElementsByClassName POLYFILL (for IE8)
 	 */
-	getByClass = (typeof document.getElementsByClassName === 'function')
+	getElementsByClassName =
+		(typeof document.getElementsByClassName === 'function')
+
+		// Use native
 		? function (cssClass) {
 			return this.getElementsByClassName(cssClass);
 		}
 
+		// Use polyfill
 		: function (cssClass) {
 			var i, j,
 				node, child,
 				result = [],
 
-				hasChildren = function (n) {
-					return (n.children && n.children.length);
+				hasChildren = function (node) {
+					return !!node.children.length;
 				},
 
-				pickNodeByClass = function (n) {
-					return hasClass(n, cssClass) && result.push(n);
+				pickByClassName = function (node) {
+					if (hasClass(node, cssClass)) {
+						result.push(node);
+					}
 				},
 
 				collection = (this === document)
@@ -101,29 +116,32 @@
 					: this.children;
 
 			for (i = 0; node = collection[i]; i++) {
-				pickNodeByClass(node);
+				pickByClassName(node);
 
 				if (hasChildren(node)) {
 					for (j = 0; child = node.children[j]; j++) {
-						(hasChildren(child) && push.call(collection, child))
-							|| pickNodeByClass(child);
+						if (hasChildren(child)) {
+							push.call(collection, child);
+						} else {
+							pickByClassName(child);
+						}
 					}
 				}
 			}
 
 			return result;
-		};
+		},
 
 	/**
 	 * SELECTOR
 	 */
-	var select = function (selector, root) {
+	select = function (selector, root) {
 		root = (root)
 			? select(root)[0]
 			: document;
 
 		if (!root) {
-			throw new TypeError();
+			throw new Error();
 		}
 
 		var found,
@@ -137,7 +155,7 @@
 		}
 
 		// [1] -> <tag>
-		// [2] -> <tag> (if .class)
+		// [2] -> <tag> (if .class specified)
 		// [3] -> .class
 		found = /^(?:([\w]+)|([\w]+)?\.([\w\-]+))$/.exec(selector);
 
@@ -146,14 +164,15 @@
 			return root.getElementsByTagName(found[1]);
 		}
 
+		var nodes = getElementsByClassName.call(root, found[3]);
+
 		// only .class
 		if (!found[2]) {
-			return getByClass.call(root, found[3]);
+			return nodes;
 		}
 
 		// <tag> & .class
-		var nodes = getByClass.call(root, found[3])
-			i, len;
+		var i, len;
 
 		for (i = 0, len = nodes.length; i < len; i++) {
 			if (nodes[i].nodeName === found[2].toUpperCase()) {
@@ -185,7 +204,7 @@
 
 	each = function (obj, fn, context) {
 		if (obj instanceof Qj) {
-			if (obj.nodes && obj.nodes.length) {
+			if (obj.nodes.length) {
 				obj = obj.nodes;
 			} else {
 				return obj;
@@ -210,17 +229,17 @@
 		return obj;
 	},
 
-	extend = function (obj, add, overwrite) {
-		each(add, function (val, key) {
+	extend = function (obj, src, keepExisting) {
+		each(src, function (val, key) {
 			if (isEnum(obj)) {
-				key = (!overwrite)
-					? obj.length
+				key = (keepExisting)
+					? obj.length // copy as a new key
 					: key;
 
-			// typeof Qj -> function
+			// typeof Qj === function
 			} else if (isObj(obj) || typeof obj === 'function') {
-				if (!overwrite && hasOwn.call(obj, key)) {
-					return; // continue
+				if (keepExisting && hasOwn.call(obj, key)) {
+					return; // don't copy
 				}
 			}
 
@@ -232,11 +251,11 @@
 
 	type = function (val) {
 		return (!val)
-			? String(val)
+			? String(val) // null & undefined
 			: classTypeMap[toString.call(val)] || 'object';
 	},
 
-	// Map classes to lowercase types
+	// Map classes to lowercase type identifiers
 	classTypeMap = [],
 	types = 'Boolean Number String Function Array Date RegExp NodeList Object';
 
@@ -251,12 +270,24 @@
 		each: each,
 		extend: extend,
 		type: type,
+		trim: (trim)
+			? function (string) {
+				return trim.call(string);
+			}
+
+			: function (string) {
+				trim = /\S/.test('\xA0')
+					? /^[\s\xA0]+|[\s\xA0]+$/g
+					: /^\s+|\s+$/g;
+
+				return string.replace(trim, '');
+			},
 
 		now: function () {
 			// '+new Date()' is slow, see: http://jsperf.com/posix-time
 			return (Date.now)
 				? Date.now()
-				: new Date.getTime();
+				: new Date().getTime();
 		},
 
 		remap: function () {
@@ -274,7 +305,7 @@
 	});
 
 	/**
-	 * DOM
+	 * DOM TRAVERSAL
 	 */
 	extend(Qj.prototype, {
 		nodes: [],
@@ -285,7 +316,7 @@
 				: 0;
 		},
 
-		i: function (idx) {
+		eq: function (idx) {
 			var i = idx || 0,
 				n = (i < 0)
 					? this.nodes.length + i
@@ -306,19 +337,76 @@
 	});
 
 	/**
+	 * DOM EVENTS
+	 */
+	extend(Qj.prototype, {
+		bind: (document.addEventListener)
+			? function (type, fn) {
+				this.each(function (node) {
+					node.Qj = {
+						events: {}
+					};
+
+					node.Qj.events[type] = [fn];
+					node.addEventListener(type, fn, false);
+				});
+
+				return this;
+			}
+
+			// IE
+			: function (type, fn) {
+				var fx;
+
+				fx = fn[guid] || (fn[guid] = function (e) {
+					e.preventDefault = function () { this.returnValue = false; };
+					e.stopPropagation = function () { this.cancelBubble = true; };
+
+					fn.call(this.nodes[0], e);
+				});
+
+				this.each(function (node) {
+					node.attachEvent('on' + type, fx);
+				});
+
+				return this;
+			},
+
+		// TODO: treat node.Qj.events[type] as an array
+		free: (document.removeEventListener)
+			? function (type, fn) {
+				this.each(function (node) {
+					if (!fn) {
+						fn = node.Qj.events[type];
+						delete node.Qj.events[type];
+					}
+
+					node.removeEventListener(type, fn, false);
+				});
+
+				return this;
+			}
+
+			// IE
+			: function (type, fn) {
+				this.each(function (node) {
+					node.detachEvent('on' + type, fn[guid] || fn);
+				});
+
+				return this;
+			}
+	});
+
+	/**
 	 * CSS
 	 */
 	extend(Qj.prototype, {
 		hasClass: function (cssClass) {
-			var result = [];
+			if (!this.nodes.length || !cssClass) {
+				return;
+			}
 
-			each(this.nodes, function (node) {
-				result.push(hasClass(node, cssClass) ? true : false);
-			});
-
-			return (result.length > 1)
-				? result
-				: result[0];
+			return hasClass(this.nodes[0], cssClass)
 		}
 	});
 
