@@ -1,6 +1,6 @@
 /**
  * Qj v0.1.4
- * a light-weight JavaScript framework
+ * a light-weight, performance oriented JavaScript framework
  * http://github.com/murger/Qj/
  *
  * Copyright 2012, Gurhan Mermer
@@ -229,16 +229,16 @@
 		return obj;
 	},
 
-	extend = function (obj, src, keepExisting) {
+	extend = function (obj, src, keep) {
 		each(src, function (val, key) {
 			if (isEnum(obj)) {
-				key = (keepExisting)
-					? obj.length // copy as a new key
-					: key;
+				key = (keep)
+					? obj.length	// new key
+					: key;			// overwrite
 
 			// typeof Qj === function
 			} else if (isObj(obj) || typeof obj === 'function') {
-				if (keepExisting && hasOwn.call(obj, key)) {
+				if (keep && hasOwn.call(obj, key)) {
 					return; // don't copy
 				}
 			}
