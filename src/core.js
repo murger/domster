@@ -1,72 +1,12 @@
-/**
- * Qj v0.1.4
- * a light-weight, performance oriented JavaScript framework
- * http://github.com/murger/Qj/
- *
- * Copyright 2012, Gurhan Mermer
- * http://twitter.com/murger/
- *
- * MIT LICENSE
- * http://opensource.org/licenses/mit-license.php
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
-/**
- * ROADMAP
- *
- * CSS: Qj(*).addClass, Qj(*).removeClass, Qj(*).style({ 'color': 'red' })
- * EVENTS: Qj(*).bind(), Qj(*).free(), Qj(*).trigger()
- * DOM Traversal
- *		Qj(*).parent()
- *		Qj(*).children()
- *		Qj(*).children('#modal')
- *		Qj(*).siblings()
- *		Qj(*).next()
- *		Qj(*).prev()
- *		Qj(*).filter(function (i) { return i % 2; })
- *		-> i(0), i(-1) as first() and last()
- * DOM Manipulation
- *		Qj.create('div', {
- *			id: 'pause',
- *			class: ['blue', 'red'],
- *			content: '...',
- *		}).insert({ : '.box') // make use of createDocumentFragment
- *
- *		Qj(*).content('meh.')
- *		Qj(*).attr('title')
- *		Qj(*).attr({ src: 'image.jpg' })
- *		Qj(*).data('price')
- *		Qj(*).data('price', { name: 'bob' })
- *		Qj(*).remove()
- * XHR: Qj.request()
- */
-
 (function (window, document) {
 	'use strict';
 
 	/**
 	 * CONSTRUCTOR
 	 */
-	var Qj = function (selector, root) {
-		if (!(this instanceof Qj)) {
-			return new Qj(selector, root);
+	var nomad = function (selector, root) {
+		if (!(this instanceof nomad)) {
+			return new nomad(selector, root);
 		}
 
 		if (selector) {
@@ -77,7 +17,7 @@
 	/**
 	 * SHORTCUTS
 	 */
-	_Qj = window.Qj,
+	_$ = window.$,
 	guid = Math.random() * 9e17,
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
@@ -203,7 +143,7 @@
 	},
 
 	each = function (obj, fn, context) {
-		if (obj instanceof Qj) {
+		if (obj instanceof nomad) {
 			if (obj.nodes.length) {
 				obj = obj.nodes;
 			} else {
@@ -236,7 +176,7 @@
 					? obj.length	// new key
 					: key;			// overwrite
 
-			// typeof Qj === function
+			// typeof nomad === function
 			} else if (isObj(obj) || typeof obj === 'function') {
 				if (keep && hasOwn.call(obj, key)) {
 					return; // don't copy
@@ -266,7 +206,7 @@
 	/**
 	 * UTILS
 	 */
-	extend(Qj, {
+	extend(nomad, {
 		each: each,
 		extend: extend,
 		type: type,
@@ -291,13 +231,13 @@
 		},
 
 		remap: function () {
-			if (window.Qj() instanceof this) {
-				delete window.Qj;
+			if (window.$() instanceof this) {
+				delete window.$;
 			}
 
-			if (_Qj) {
-				window.Qj = _Qj;
-				_Qj = undefined;
+			if (_$) {
+				window.$ = _$;
+				_$ = undefined;
 			}
 
 			return this;
@@ -307,7 +247,7 @@
 	/**
 	 * DOM TRAVERSAL
 	 */
-	extend(Qj.prototype, {
+	extend(nomad.prototype, {
 		nodes: [],
 
 		count: function () {
@@ -339,15 +279,15 @@
 	/**
 	 * DOM EVENTS
 	 */
-	extend(Qj.prototype, {
+	extend(nomad.prototype, {
 		bind: (document.addEventListener)
 			? function (type, fn) {
 				this.each(function (node) {
-					node.Qj = {
+					node.nomad = {
 						events: {}
 					};
 
-					node.Qj.events[type] = [fn];
+					node.nomad.events[type] = [fn];
 					node.addEventListener(type, fn, false);
 				});
 
@@ -372,13 +312,13 @@
 				return this;
 			},
 
-		// TODO: treat node.Qj.events[type] as an array
+		// TODO: treat node.nomad.events[type] as an array
 		free: (document.removeEventListener)
 			? function (type, fn) {
 				this.each(function (node) {
 					if (!fn) {
-						fn = node.Qj.events[type];
-						delete node.Qj.events[type];
+						fn = node.nomad.events[type];
+						delete node.nomad.events[type];
 					}
 
 					node.removeEventListener(type, fn, false);
@@ -400,7 +340,7 @@
 	/**
 	 * CSS
 	 */
-	extend(Qj.prototype, {
+	extend(nomad.prototype, {
 		hasClass: function (cssClass) {
 			if (!this.nodes.length || !cssClass) {
 				return;
@@ -413,7 +353,7 @@
 	/**
 	 * VERSIONING & EXPOSURE
 	 */
-	Qj.v = '0.1.4';
-	window.Qj = Qj;
+	nomad.v = '0.1.4';
+	window.$ = nomad;
 
 })(this, this.document);
