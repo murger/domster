@@ -9,27 +9,20 @@
 (function (global) {
 	'use strict';
 
-	// ### CONSTRUCTOR
 	var dommy = function (query, context) {
-		var nodes;
-
 		if (!(this instanceof dommy)) {
 			return new dommy(query, context);
 		}
 
 		if (typeof query === 'string') {
-			nodes = select(query, context);
-			extend(this, nodes);
-			this.length = nodes.length;
+			this.set = select(query, context);
 		} else if (isElement(query)) {
-			extend(this, [query])
-			this.length = 1;
+			this.set = [query];
 		}
 
 		return this;
 	},
 
-	// ### SELECTOR
 	select = function (query, context) {
 		var match,
 			nodes,
@@ -94,13 +87,12 @@
 	},
 
 	each = function (obj, fn, context) {
-		var isDommy = (obj instanceof dommy);
-
-		if (isDommy && !obj.length) {
-			return obj;
+		if (obj instanceof dommy) {
+			if (obj.count()) { obj = obj.set; }
+			else { return obj; }
 		}
 
-		if (isEnum(obj) || isDommy) {
+		if (isEnum(obj)) {
 			for (var i = 0; i < obj.length; i++) {
 				fn.call(context || obj[i], obj[i], i, obj);
 			}
@@ -160,18 +152,22 @@
 	});
 
 	extend(dommy.prototype, {
+		set: [],
+
+		count: function () {
+			return this.set.length;
+		},
+
 		// ### TRAVERSAL
 		each: function () {
 			var self = [this];
 
 			push.apply(self, arguments);
-			each.apply(this, self);
-
-			return this;
+			return each.apply(this, self);
 		},
 
 		parent: function () {
-			if (!this.length) {
+			if (!this.count()) {
 				return;
 			}
 
@@ -182,19 +178,20 @@
 		hasClass: function (className) {
 			var result = true;
 
-			if (!this.length || !className) {
+			if (!this.count() || !className) {
 				return;
 			}
 
 			this.each(function (node) {
-				result = hasClass(node, className);
+				if (!hasClass(node, className))
+					result = false;
 			});
 
 			return result;
 		},
 
 		addClass: function (className) {
-			if (!this.length || !className) {
+			if (!this.count() || !className) {
 				return;
 			}
 
@@ -208,7 +205,7 @@
 		},
 
 		removeClass: function (className) {
-			if (!this.length || !className) {
+			if (!this.count() || !className) {
 				return;
 			}
 
