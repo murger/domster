@@ -18,6 +18,10 @@
 			this.set = select(query, context);
 		} else if (isElement(query)) {
 			this.set = [query];
+		} else if (type(query) === 'nodelist') {
+			this.set = query;
+		} else if (query instanceof dommy) {
+			this.set = query.set;
 		}
 
 		return this;
@@ -30,8 +34,8 @@
 
 		if (!context) {
 			context = global.document;
-		} else if (!isElement(context)) {
-			context = select(context)[0];
+		} else if (!isElement(context) && !isDocument(context)) {
+			context = select(context).get(0);
 		}
 
 		// #id
@@ -86,18 +90,33 @@
 		return (node.nodeType === 1);
 	},
 
-	each = function (obj, fn, context) {
-		if (obj instanceof dommy) {
-			if (obj.count()) { obj = obj.set; }
-			else { return obj; }
-		}
+	isDocument = function (node) {
+		return (node.nodeType === 9);
+	},
 
-		if (isEnum(obj)) {
-			for (var i = 0; i < obj.length; i++) {
+	each = function (obj, fn, context) {
+		var i = 0,
+			key;
+
+		// Dommy sets
+		if (obj instanceof dommy && obj.count()) {
+			if (obj.count() === 1) {
+				fn.call(new dommy(obj.get(0)), obj.get(0), 0, obj.set);
+			} else {
+				for (; i < obj.count(); i++) {
+					fn.call(new dommy(obj.get(i)), obj.get(i), i, obj.set);
+				}
+			}
+
+		// Arrays and NodeLists
+		} else if (isEnum(obj)) {
+			for (; i < obj.length; i++) {
 				fn.call(context || obj[i], obj[i], i, obj);
 			}
+
+		// Other objects
 		} else if (isObj(obj)) {
-			for (var key in obj) {
+			for (key in obj) {
 				if (hasOwn.call(obj, key)) {
 					fn.call(context || obj[key], obj[key], key, obj);
 				}
@@ -125,10 +144,10 @@
 		return obj;
 	},
 
-	hasClass = function (node, className) {
-		return (node.classList)
-			? node.classList.contains(className)
-			: new RegExp("(^|\\s)" + className + "(\\s|$)").test(node.className);
+	hasClass = function (el, className) {
+		return (el.classList)
+			? el.classList.contains(className)
+			: new RegExp("(^|\\s)" + className + "(\\s|$)").test(el.className);
 	},
 
 	types = 'Boolean Number String Function Array Date RegExp NodeList Object',
@@ -154,16 +173,22 @@
 	extend(dommy.prototype, {
 		set: [],
 
+		get: function (idx) {
+			return this.set[idx];
+		},
+
 		count: function () {
 			return this.set.length;
 		},
 
 		// ### TRAVERSAL
 		each: function () {
-			var self = [this];
+			var augment = [this];
 
-			push.apply(self, arguments);
-			return each.apply(this, self);
+			push.apply(augment, arguments);
+			each.apply(this, augment);
+
+			return this;
 		},
 
 		parent: function () {
@@ -171,7 +196,7 @@
 				return;
 			}
 
-			return this[0].parentNode && dommy(this[0].parentNode);
+			return new dommy(this.get(0).parentNode);
 		},
 
 		// ### CSS
@@ -182,9 +207,10 @@
 				return;
 			}
 
-			this.each(function (node) {
-				if (!hasClass(node, className))
+			this.each(function (el) {
+				if (!hasClass(el, className)) {
 					result = false;
+				}
 			});
 
 			return result;
@@ -195,11 +221,11 @@
 				return;
 			}
 
-			return this.each(function (node) {
-				if (node.classList) {
-					node.classList.add(className);
-				} else if (!hasClass(node, className)) {
-					node.className = [node.className, className].join(' ');
+			return this.each(function (el) {
+				if (el.classList) {
+					el.classList.add(className);
+				} else if (!hasClass(el, className)) {
+					el.className = [el.className, className].join(' ');
 				}
 			});
 		},
@@ -209,11 +235,11 @@
 				return;
 			}
 
-			return this.each(function (node) {
-				if (node.classList) {
-					node.classList.remove(className);
+			return this.each(function (el) {
+				if (el.classList) {
+					el.classList.remove(className);
 				} else {
-					node.className = node.className
+					el.className = el.className
 						.replace(new RegExp('\\b' + className+ '\\b', 'g'), '');
 				}
 			});
@@ -221,14 +247,14 @@
 
 		// ### EVENTS
 		on: function (type, fn) {
-			return this.each(function (node) {
-				node.addEventListener(type, fn);
+			return this.each(function (el) {
+				el.addEventListener(type, fn);
 			});
 		},
 
 		off: function (type, fn) {
-			return this.each(function (node) {
-				node.removeEventListener(type, fn);
+			return this.each(function (el) {
+				el.removeEventListener(type, fn);
 			});
 		}
 	});
