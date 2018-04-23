@@ -1,4 +1,12 @@
-(function (window, document) {
+/*!
+ *	dommy.js
+ *	https://github.com/murger/dommy.js
+ *
+ *	Copyright 2010, 2018 G Mermer
+ *	Released under the MIT license
+ */
+
+(function (global) {
 	'use strict';
 
 	// ### CONSTRUCTOR
@@ -14,7 +22,7 @@
 			extend(this, nodes);
 			this.length = nodes.length;
 		} else if (isElement(query)) {
-			this[0] = query;
+			extend(this, [query])
 			this.length = 1;
 		}
 
@@ -28,7 +36,7 @@
 			result = [];
 
 		if (!context) {
-			context = document;
+			context = global.document;
 		} else if (!isElement(context)) {
 			context = select(context)[0];
 		}
@@ -97,7 +105,7 @@
 				fn.call(context || obj[i], obj[i], i, obj);
 			}
 		} else if (isObj(obj)) {
-			for (var i in obj) {
+			for (var key in obj) {
 				if (hasOwn.call(obj, key)) {
 					fn.call(context || obj[key], obj[key], key, obj);
 				}
@@ -228,7 +236,15 @@
 		}
 	});
 
-	dommy.v = '0.2.0';
-	window.$ = dommy;
+	if (typeof define === 'function' && define.amd) {
+		define(function () { return dommy; });
+	} else if (typeof exports !== 'undefined') {
+		if (typeof module !== 'undefined' && module.exports) {
+			exports = module.exports = dommy; // Node.js
+		}
 
-})(this, this.document);
+		exports.$ = dommy; // CJS 1.1.1
+	} else {
+		global.$ = dommy;
+	}
+})(this);
