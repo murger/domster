@@ -9,9 +9,9 @@
 (function (global) {
 	'use strict';
 
-	var dommy = function (query, context) {
-		if (!(this instanceof dommy)) {
-			return new dommy(query, context);
+	var Dommy = function (query, context) {
+		if (!(this instanceof Dommy)) {
+			return new Dommy(query, context);
 		}
 
 		if (typeof query === 'string') {
@@ -20,7 +20,7 @@
 			this.set = [query];
 		} else if (type(query) === 'nodelist') {
 			this.set = query;
-		} else if (query instanceof dommy) {
+		} else if (query instanceof Dommy) {
 			this.set = query.set;
 		}
 
@@ -99,12 +99,12 @@
 			key;
 
 		// Dommy sets
-		if (obj instanceof dommy && obj.count()) {
+		if (obj instanceof Dommy && obj.count()) {
 			if (obj.count() === 1) {
-				fn.call(new dommy(obj.get(0)), obj.get(0), 0, obj.set);
+				fn.call(new Dommy(obj.get(0)), obj.get(0), 0, obj.set);
 			} else {
 				for (; i < obj.count(); i++) {
-					fn.call(new dommy(obj.get(i)), obj.get(i), i, obj.set);
+					fn.call(new Dommy(obj.get(i)), obj.get(i), i, obj.set);
 				}
 			}
 
@@ -164,13 +164,13 @@
 	});
 
 	// ### UTILS
-	extend(dommy, {
+	extend(Dommy, {
 		each: each,
 		extend: extend,
 		type: type
 	});
 
-	extend(dommy.prototype, {
+	extend(Dommy.prototype, {
 		set: [],
 
 		get: function (idx) {
@@ -196,7 +196,36 @@
 				return;
 			}
 
-			return new dommy(this.get(0).parentNode);
+			this.set = [this.get(0).parentNode]
+
+			return this;
+		},
+
+		siblings: function () {
+			if (!this.count()) {
+				return;
+			}
+
+			var node = this.get(0).parentNode.firstChild,
+				set = [];
+
+			for (; node; node = node.nextSibling) {
+				isElement(node) && (node !== this.get(0)) && set.push(node);
+			}
+
+			this.set = set;
+
+			return this;
+		},
+
+		children: function () {
+			if (!this.count()) {
+				return;
+			}
+
+			this.set = this.get(0).children;
+
+			return this;
 		},
 
 		// ### CSS
@@ -260,14 +289,13 @@
 	});
 
 	if (typeof define === 'function' && define.amd) {
-		define(function () { return dommy; });
+		define(function () { return Dommy; });
 	} else if (typeof exports !== 'undefined') {
 		if (typeof module !== 'undefined' && module.exports) {
-			exports = module.exports = dommy; // Node.js
+			exports = module.exports = Dommy; // Node.js
 		}
-
-		exports.$ = dommy; // CJS 1.1.1
+		exports.$ = Dommy; // CJS 1.1.1
 	} else {
-		global.$ = dommy;
+		global.$ = Dommy;
 	}
 })(this);
