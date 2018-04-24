@@ -69,12 +69,13 @@
 			}
 		}
 
-		return result;
+		return slice.call(result);
 	},
 
 	// ### SHORTCUTS
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
+	slice = Array.prototype.slice,
 	push = Array.prototype.push,
 
 	// ### HELPERS
@@ -192,9 +193,7 @@
 		},
 
 		parent: function () {
-			if (!this.count()) {
-				return;
-			}
+			if (!this.count()) { return; }
 
 			this.set = [this.get(0).parentNode]
 
@@ -202,9 +201,7 @@
 		},
 
 		siblings: function () {
-			if (!this.count()) {
-				return;
-			}
+			if (!this.count()) { return; }
 
 			var node = this.get(0).parentNode.firstChild,
 				set = [];
@@ -219,22 +216,32 @@
 		},
 
 		children: function () {
-			if (!this.count()) {
-				return;
-			}
+			if (!this.count()) { return; }
 
 			this.set = this.get(0).children;
 
 			return this;
 		},
 
+		find: function (query) {
+			if (!this.count() || !query) { return; }
+
+			var set = [];
+
+			this.each(function (el) {
+				set = set.concat(slice.call(select(query, el)));
+			});
+
+			this.set = set;
+
+			return this;
+		},
+
 		// ### CSS
 		hasClass: function (className) {
-			var result = true;
+			if (!this.count() || !className) { return; }
 
-			if (!this.count() || !className) {
-				return;
-			}
+			var result = true;
 
 			this.each(function (el) {
 				if (!hasClass(el, className)) {
@@ -246,9 +253,7 @@
 		},
 
 		addClass: function (className) {
-			if (!this.count() || !className) {
-				return;
-			}
+			if (!this.count() || !className) { return; }
 
 			return this.each(function (el) {
 				if (el.classList) {
@@ -260,9 +265,7 @@
 		},
 
 		removeClass: function (className) {
-			if (!this.count() || !className) {
-				return;
-			}
+			if (!this.count() || !className) { return; }
 
 			return this.each(function (el) {
 				if (el.classList) {
