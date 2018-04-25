@@ -237,6 +237,20 @@
 			return this;
 		},
 
+		filter: function (query) {
+			if (!this.count() || !query) { return; }
+
+			var set = [];
+
+			this.each(function (el) {
+				if (el.matches(query)) { set.push(el); }
+			});
+
+			this.set = set;
+
+			return this;
+		},
+
 		// ### CSS
 		css: function (key, val) {
 			if (!this.count() || !key) { return; }
