@@ -238,6 +238,24 @@
 		},
 
 		// ### CSS
+		css: function (key, val) {
+			if (!this.count() || !key) { return; }
+
+			var el = this.get(0);
+
+			if (type(key) === 'string' && !val) {
+				return getComputedStyle(el)[key];
+			} else if (val) {
+				el.style[key] = val;
+			} else if (type(key) === 'object') {
+				each(key, function (val, prop) {
+					el.style[prop] = val;
+				});
+			}
+
+			return this;
+		},
+
 		hasClass: function (className) {
 			if (!this.count() || !className) { return; }
 
@@ -313,6 +331,12 @@
 		off: function (type, fn) {
 			return this.each(function (el) {
 				el.removeEventListener(type, fn);
+			});
+		},
+
+		trigger: function (type) {
+			return this.each(function (el) {
+				el.dispatchEvent(new Event(type));
 			});
 		}
 	});
