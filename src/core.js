@@ -40,7 +40,7 @@
 
 		// #id
 		if (match = /^#([\w\-]+)$/.exec(query)) {
-			return (result = context.getElementById(match[1]))
+			return (result = slice.call(context.getElementById(match[1])))
 				? [result]
 				: [];
 		}
@@ -52,10 +52,10 @@
 
 		// only <tag>
 		if (match[1]) {
-			return context.getElementsByTagName(match[1]);
+			return slice.call(context.getElementsByTagName(match[1]));
 		}
 
-		nodes = context.getElementsByClassName(match[3]);
+		nodes = slice.call(context.getElementsByClassName(match[3]));
 
 		// only .class
 		if (!match[2]) {
@@ -69,7 +69,7 @@
 			}
 		}
 
-		return slice.call(result);
+		return result;
 	},
 
 	// ### SHORTCUTS
@@ -229,7 +229,7 @@
 			var set = [];
 
 			this.each(function (el) {
-				set = set.concat(slice.call(select(query, el)));
+				set = set.concat(select(query, el));
 			});
 
 			this.set = set;
@@ -274,6 +274,32 @@
 					el.className = el.className
 						.replace(new RegExp('\\b' + className+ '\\b', 'g'), '');
 				}
+			});
+		},
+
+		val: function () {
+			if (!this.count()) { return; }
+
+			return this.get(0).value;
+		},
+
+		attr: function (key, val) {
+			if (!this.count() || !key) { return; }
+
+			if (val) {
+				return this.each(function (el) {
+					el.setAttribute(key, val);
+				});
+			} else {
+				this.get(0).getAttribute(key);
+			}
+		},
+
+		removeAttr: function (key) {
+			if (!this.count() || !key) { return; }
+
+			return this.each(function (el) {
+				el.removeAttribute(key);
 			});
 		},
 
