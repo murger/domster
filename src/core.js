@@ -256,6 +256,28 @@
 			return this;
 		},
 
+		position: function () {
+			if (!this.count()) { return; }
+
+			var el = this.get(0);
+
+			return {
+				top: el.offsetTop,
+				left: el.offsetLeft
+			};
+		},
+
+		offset: function () {
+			if (!this.count()) { return; }
+
+			var rect = this.get(0).getBoundingClientRect();
+
+			return {
+				top: rect.top + document.body.scrollTop,
+				left: rect.left + document.body.scrollLeft
+			};
+		},
+
 		hasClass: function (className) {
 			if (!this.count() || !className) { return; }
 
@@ -295,6 +317,7 @@
 			});
 		},
 
+		// ### ATTRIBUTES
 		val: function () {
 			if (!this.count()) { return; }
 
