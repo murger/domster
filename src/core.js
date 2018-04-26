@@ -6,7 +6,7 @@
  *	Released under the MIT license
  */
 
-(function (global) {
+(function (window) {
 	'use strict';
 
 	var Dommy = function (query, context) {
@@ -19,7 +19,7 @@
 		} else if (isElement(query)) {
 			this.set = [query];
 		} else if (type(query) === 'nodelist') {
-			this.set = query;
+			this.set = slice.call(query);
 		} else if (query instanceof Dommy) {
 			this.set = query.set;
 		}
@@ -33,7 +33,7 @@
 			result = [];
 
 		if (!context) {
-			context = global.document;
+			context = window.document;
 		} else if (!isElement(context) && !isDocument(context)) {
 			context = select(context).get(0);
 		}
@@ -248,12 +248,22 @@
 		},
 
 		// ### MANIPULATION
-		append: function (el) {},
+		append: function (node) {
+			return this.each(function (el) {
+				el.appendChild(node);
+			});
+		},
+
+		prepend: function (node) {
+			return this.each(function (el) {
+				el.insertBefore(node, el.firstChild);
+			});
+		},
 
 		empty: function () {
-			this.get(0).innerHTML = '';
-
-			return this;
+			return this.each(function (el) {
+				el.innerHTML = '';
+			});
 		},
 
 		html: function (val) {
@@ -408,12 +418,9 @@
 
 	if (typeof define === 'function' && define.amd) {
 		define(function () { return Dommy; });
-	} else if (typeof exports !== 'undefined') {
-		if (typeof module !== 'undefined' && module.exports) {
-			exports = module.exports = Dommy; // Node.js
-		}
-		exports.$ = Dommy; // CJS 1.1.1
+	} else if (typeof module === 'object' && module.exports) {
+		module.exports = Dommy;
 	} else {
-		global.$ = Dommy;
+		window.$ = Dommy;
 	}
 })(this);
