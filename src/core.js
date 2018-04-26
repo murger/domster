@@ -363,9 +363,8 @@
 			var result = true;
 
 			this.each(function (el) {
-				result = (el.classList)
-					? el.classList.contains(className)
-					: new RegExp("(^|\\s)" + className + "(\\s|$)").test(el.className);
+				result = new RegExp("(^|\\s)" + className + "(\\s|$)")
+					.test(el.className);
 			});
 
 			return result;
@@ -375,24 +374,18 @@
 			if (!this.count() || !className) { return; }
 
 			return this.each(function (el) {
-				if (el.classList) {
-					el.classList.add(className);
-				} else if (this.hasClass(className)) {
+				if (!this.hasClass(className)) {
 					el.className = [el.className, className].join(' ');
 				}
 			});
 		},
 
 		removeClass: function (className) {
-			if (!this.count() || !className) { return; }
+			if (!this.count()) { return; }
 
 			return this.each(function (el) {
-				if (el.classList) {
-					el.classList.remove(className);
-				} else {
-					el.className = el.className
-						.replace(new RegExp('\\b' + className+ '\\b', 'g'), '');
-				}
+				el.className = (!className) ? '' : el.className
+					.replace(new RegExp('\\b' + className + '\\b', 'g'), '');
 			});
 		},
 
