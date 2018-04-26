@@ -247,6 +247,65 @@
 			return this;
 		},
 
+		// ### MANIPULATION
+		append: function (el) {},
+
+		empty: function () {
+			this.get(0).innerHTML = '';
+
+			return this;
+		},
+
+		html: function (val) {
+			if (!this.count()) { return; }
+
+			if (val) {
+				return this.each(function (el) {
+					el.innerHTML = val;
+				});
+			} else {
+				return this.get(0).innerHTML;
+			}
+		},
+
+		text: function (val) {
+			if (!this.count()) { return; }
+
+			if (val) {
+				return this.each(function (el) {
+					el.innerText = val;
+				});
+			} else {
+				return this.get(0).innerText;
+			}
+		},
+
+		attr: function (key, val) {
+			if (!this.count() || !key) { return; }
+
+			if (val) {
+				return this.each(function (el) {
+					el.setAttribute(key, val);
+				});
+			} else {
+				return this.get(0).getAttribute(key);
+			}
+		},
+
+		val: function () {
+			if (!this.count()) { return; }
+
+			return this.get(0).value;
+		},
+
+		removeAttr: function (key) {
+			if (!this.count() || !key) { return; }
+
+			return this.each(function (el) {
+				el.removeAttribute(key);
+			});
+		},
+
 		// ### CSS
 		css: function (key, val) {
 			if (!this.count() || !key) { return; }
@@ -324,33 +383,6 @@
 					el.className = el.className
 						.replace(new RegExp('\\b' + className+ '\\b', 'g'), '');
 				}
-			});
-		},
-
-		// ### ATTRIBUTES
-		val: function () {
-			if (!this.count()) { return; }
-
-			return this.get(0).value;
-		},
-
-		attr: function (key, val) {
-			if (!this.count() || !key) { return; }
-
-			if (val) {
-				return this.each(function (el) {
-					el.setAttribute(key, val);
-				});
-			} else {
-				return this.get(0).getAttribute(key);
-			}
-		},
-
-		removeAttr: function (key) {
-			if (!this.count() || !key) { return; }
-
-			return this.each(function (el) {
-				el.removeAttribute(key);
 			});
 		},
 
