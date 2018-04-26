@@ -145,12 +145,6 @@
 		return obj;
 	},
 
-	hasClass = function (el, className) {
-		return (el.classList)
-			? el.classList.contains(className)
-			: new RegExp("(^|\\s)" + className + "(\\s|$)").test(el.className);
-	},
-
 	types = 'Boolean Number String Function Array Date RegExp NodeList Object',
 	typeMap = [],
 
@@ -182,7 +176,6 @@
 			return this.set.length;
 		},
 
-		// ### TRAVERSAL
 		each: function () {
 			var augment = [this];
 
@@ -192,37 +185,7 @@
 			return this;
 		},
 
-		parent: function () {
-			if (!this.count()) { return; }
-
-			this.set = [this.get(0).parentNode]
-
-			return this;
-		},
-
-		siblings: function () {
-			if (!this.count()) { return; }
-
-			var node = this.get(0).parentNode.firstChild,
-				set = [];
-
-			for (; node; node = node.nextSibling) {
-				isElement(node) && (node !== this.get(0)) && set.push(node);
-			}
-
-			this.set = set;
-
-			return this;
-		},
-
-		children: function () {
-			if (!this.count()) { return; }
-
-			this.set = this.get(0).children;
-
-			return this;
-		},
-
+		// ### TRAVERSAL
 		find: function (query) {
 			if (!this.count() || !query) { return; }
 
@@ -230,6 +193,39 @@
 
 			this.each(function (el) {
 				set = set.concat(select(query, el));
+			});
+
+			this.set = set;
+
+			return this;
+		},
+
+		parent: function () {
+			if (!this.count()) { return; }
+
+			this.set = [this.get(0).parentNode];
+
+			return this;
+		},
+
+		children: function (query) {
+			if (!this.count()) { return; }
+
+			this.set = slice.call(this.get(0).children);
+
+			return (query) ? this.filter(query) : this;
+		},
+
+		siblings: function (query) {
+			if (!this.count()) { return; }
+
+			var node = this.get(0),
+				set = [];
+
+			this.parent().children().each(function (el) {
+				if (el !== node && (!query || el.matches(query))) {
+					set.push(el);
+				}
 			});
 
 			this.set = set;
@@ -298,9 +294,9 @@
 			var result = true;
 
 			this.each(function (el) {
-				if (!hasClass(el, className)) {
-					result = false;
-				}
+				result = (el.classList)
+					? el.classList.contains(className)
+					: new RegExp("(^|\\s)" + className + "(\\s|$)").test(el.className);
 			});
 
 			return result;
@@ -312,7 +308,7 @@
 			return this.each(function (el) {
 				if (el.classList) {
 					el.classList.add(className);
-				} else if (!hasClass(el, className)) {
+				} else if (this.hasClass(className)) {
 					el.className = [el.className, className].join(' ');
 				}
 			});
@@ -346,7 +342,7 @@
 					el.setAttribute(key, val);
 				});
 			} else {
-				this.get(0).getAttribute(key);
+				return this.get(0).getAttribute(key);
 			}
 		},
 
