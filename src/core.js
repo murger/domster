@@ -18,12 +18,13 @@
 			return new dommy(query, context);
 		}
 
+		// TODO: new element <el>
 		if (typeof query === 'string') {
 			this.set = select(query, context);
-		} else if (isElement(query)) {
-			this.set = [query];
 		} else if (type(query) === 'nodelist') {
 			this.set = query;
+		} else if (isElement(query)) {
+			this.set = [query];
 		} else if (query instanceof dommy) {
 			this.set = query.set;
 		}
@@ -364,7 +365,32 @@
 					el.innerText = val;
 				});
 			} else {
+				// TODO: combine each
 				return this.get(0).innerText;
+			}
+		},
+
+		val: function (val) {
+			if (!this.count()) { return; }
+
+			if (val) {
+				return this.each(function (el) {
+					el.value = val;
+				});
+			} else {
+				return this.get(0).value;
+			}
+		},
+
+		data: function (key, val) {
+			if (!this.count() || !key) { return; }
+
+			if (val) {
+				return this.each(function (el) {
+					el.dataset[key] = val;
+				});
+			} else {
+				return this.get(0).dataset[key];
 			}
 		},
 
@@ -378,12 +404,6 @@
 			} else {
 				return this.get(0).getAttribute(key);
 			}
-		},
-
-		val: function () {
-			if (!this.count()) { return; }
-
-			return this.get(0).value;
 		},
 
 		removeAttr: function (key) {
