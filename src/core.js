@@ -23,7 +23,7 @@
 		} else if (isElement(query)) {
 			this.set = [query];
 		} else if (type(query) === 'nodelist') {
-			this.set = slice.call(query);
+			this.set = query;
 		} else if (query instanceof dommy) {
 			this.set = query.set;
 		}
@@ -87,6 +87,7 @@
 	// ### SHORTCUTS
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
+	concat = Array.prototype.concat,
 	slice = Array.prototype.slice,
 	push = Array.prototype.push,
 	matches = Element.prototype.matches || Element.prototype.msMatchesSelector,
@@ -222,7 +223,7 @@
 			var set = [];
 
 			this.each(function (el) {
-				set = set.concat(select(query, el));
+				set = set.concat(slice.call(select(query, el)));
 			});
 
 			this.set = set;
@@ -292,27 +293,6 @@
 			return this;
 		},
 
-		append: function (node) {
-			var count = this.count();
-
-			if (!count) { return; }
-
-			return this.each(function (el) {
-				el.appendChild((count > 1) ? node.cloneNode(true) : node);
-			});
-		},
-
-		prepend: function (node) {
-			var count = this.count();
-
-			if (!count) { return; }
-
-			return this.each(function (el) {
-				el.insertBefore((count > 1) ? node.cloneNode(true) : node,
-					el.firstChild);
-			});
-		},
-
 		remove: function (query) {
 			if (!this.count()) { return; }
 
@@ -321,6 +301,39 @@
 					el.parentNode.removeChild(el);
 				}
 			});
+		},
+
+		append: function (node) {
+			var count = this.count();
+
+			if (!count) { return; }
+
+			this.each(function (el) {
+				el.appendChild((count > 1) ? node.cloneNode(true) : node);
+			});
+
+			if (count > 1) {
+				node.parentNode.removeChild(node);
+			}
+
+			return this;
+		},
+
+		prepend: function (node) {
+			var count = this.count();
+
+			if (!count) { return; }
+
+			this.each(function (el) {
+				el.insertBefore((count > 1) ? node.cloneNode(true) : node,
+					el.firstChild);
+			});
+
+			if (count > 1) {
+				node.parentNode.removeChild(node);
+			}
+
+			return this;
 		},
 
 		empty: function () {
