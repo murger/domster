@@ -13,9 +13,9 @@
 		throw new Error();
 	}
 
-	var Dommy = function (query, context) {
-		if (!(this instanceof Dommy)) {
-			return new Dommy(query, context);
+	var dommy = function (query, context) {
+		if (!(this instanceof dommy)) {
+			return new dommy(query, context);
 		}
 
 		if (typeof query === 'string') {
@@ -24,7 +24,7 @@
 			this.set = [query];
 		} else if (type(query) === 'nodelist') {
 			this.set = slice.call(query);
-		} else if (query instanceof Dommy) {
+		} else if (query instanceof dommy) {
 			this.set = query.set;
 		}
 
@@ -77,7 +77,7 @@
 		// <tag> & .class
 		for (var i = 0, len = nodes.length; i < len; i++) {
 			if (nodes[i].nodeName === match[2].toUpperCase()) {
-				result.push(nodes[i]);
+				set.push(nodes[i]);
 			}
 		}
 
@@ -101,13 +101,13 @@
 	},
 
 	each = function (obj, fn, context) {
-		if (obj instanceof Dommy && obj.count()) {
+		if (obj instanceof dommy && obj.count()) {
 			if (obj.count() === 1) {
-				fn.call(context || new Dommy(obj.get(0)),
+				fn.call(context || new dommy(obj.get(0)),
 					obj.get(0), 0, obj.set);
 			} else {
 				for (var i = 0, len = obj.count(); i < len; i++) {
-					fn.call(context || new Dommy(obj.get(i)),
+					fn.call(context || new dommy(obj.get(i)),
 						obj.get(i), i, obj.set);
 				}
 			}
@@ -158,13 +158,13 @@
 	});
 
 	// ### UTILS
-	extend(Dommy, {
+	extend(dommy, {
 		each: each,
 		extend: extend,
 		type: type
 	});
 
-	extend(Dommy.prototype, {
+	extend(dommy.prototype, {
 		set: [],
 
 		get: function (idx) {
@@ -435,8 +435,22 @@
 			if (!this.count()) { return; }
 
 			return this.each(function (el) {
-				el.className = (!className) ? '' : el.className
-					.replace(new RegExp('\\b' + className + '\\b', 'g'), '');
+				if (!className || this.hasClass(className)) {
+					el.className = (!className) ? '' : el.className
+						.replace(new RegExp('\\b' + className + '\\b', 'g'), '');
+				}
+			});
+		},
+
+		toggleClass: function (className) {
+			if (!this.count() || !className) { return; }
+
+			return this.each(function (el) {
+				if (!this.hasClass(className)) {
+					this.addClass(className);
+				} else {
+					this.removeClass(className);
+				}
 			});
 		},
 
@@ -461,10 +475,10 @@
 	});
 
 	if (typeof define === 'function' && define.amd) {
-		define(function () { return Dommy; });
+		define(function () { return dommy; });
 	} else if (typeof module === 'object' && module.exports) {
-		module.exports = Dommy;
+		module.exports = dommy;
 	} else {
-		window.$ = Dommy;
+		window.$ = dommy;
 	}
 })(this);
