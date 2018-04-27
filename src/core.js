@@ -52,7 +52,7 @@
 
 		// #id
 		if (match = /^#([\w\-]+)$/.exec(query)) {
-			return (set = slice.call(context.getElementById(match[1])))
+			return (set = context.getElementById(match[1]))
 				? [set]
 				: [];
 		}
@@ -64,10 +64,10 @@
 
 		// only <tag>
 		if (match[1]) {
-			return slice.call(context.getElementsByTagName(match[1]));
+			return context.getElementsByTagName(match[1]);
 		}
 
-		nodes = slice.call(context.getElementsByClassName(match[3]));
+		nodes = context.getElementsByClassName(match[3]);
 
 		// only .class
 		if (!match[2]) {
@@ -278,6 +278,20 @@
 		},
 
 		// ### MANIPULATION
+		clone: function () {
+			if (!this.count()) { return; }
+
+			var set = [];
+
+			this.each(function (el) {
+				set.push(el.cloneNode(true));
+			});
+
+			this.set = set;
+
+			return this;
+		},
+
 		append: function (node) {
 			var count = this.count();
 
@@ -411,11 +425,13 @@
 		hasClass: function (className) {
 			if (!this.count() || !className) { return; }
 
-			var result = true;
+			var result = false,
+				pattern = new RegExp("(^|\\s)" + className + "(\\s|$)");
 
 			this.each(function (el) {
-				result = new RegExp("(^|\\s)" + className + "(\\s|$)")
-					.test(el.className);
+				if (pattern.test(el.className)) {
+					result = true;
+				}
 			});
 
 			return result;
@@ -434,10 +450,13 @@
 		removeClass: function (className) {
 			if (!this.count()) { return; }
 
+			var pattern = new RegExp('\\b' + className + '\\b', 'g');
+
 			return this.each(function (el) {
-				if (!className || this.hasClass(className)) {
-					el.className = (!className) ? '' : el.className
-						.replace(new RegExp('\\b' + className + '\\b', 'g'), '');
+				if (this.hasClass(className)) {
+					el.className = el.className.replace(pattern, '');
+				} else if (!className) {
+					el.className = '';
 				}
 			});
 		},
