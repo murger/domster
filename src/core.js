@@ -9,6 +9,10 @@
 (function (window) {
 	'use strict';
 
+	if (!window.document) {
+		throw new Error();
+	}
+
 	var Dommy = function (query, context) {
 		if (!(this instanceof Dommy)) {
 			return new Dommy(query, context);
@@ -27,10 +31,18 @@
 		return this;
 	},
 
+	isElement = function (node) {
+		return (node.nodeType === 1);
+	},
+
+	isDocument = function (node) {
+		return (node.nodeType === 9);
+	},
+
 	select = function (query, context) {
 		var match,
 			nodes,
-			result = [];
+			set = [];
 
 		if (!context) {
 			context = window.document;
@@ -40,8 +52,8 @@
 
 		// #id
 		if (match = /^#([\w\-]+)$/.exec(query)) {
-			return (result = slice.call(context.getElementById(match[1])))
-				? [result]
+			return (set = slice.call(context.getElementById(match[1])))
+				? [set]
 				: [];
 		}
 
@@ -69,7 +81,7 @@
 			}
 		}
 
-		return result;
+		return set;
 	},
 
 	// ### SHORTCUTS
@@ -77,6 +89,7 @@
 	hasOwn = Object.prototype.hasOwnProperty,
 	slice = Array.prototype.slice,
 	push = Array.prototype.push,
+	matches = Element.prototype.matches || Element.prototype.msMatchesSelector,
 
 	// ### HELPERS
 	isObj = function (obj) {
@@ -87,37 +100,23 @@
 		return (type(obj) === 'array' || type(obj) === 'nodelist');
 	},
 
-	isElement = function (node) {
-		return (node.nodeType === 1);
-	},
-
-	isDocument = function (node) {
-		return (node.nodeType === 9);
-	},
-
 	each = function (obj, fn, context) {
-		var i = 0,
-			key;
-
-		// Dommy sets
 		if (obj instanceof Dommy && obj.count()) {
 			if (obj.count() === 1) {
-				fn.call(new Dommy(obj.get(0)), obj.get(0), 0, obj.set);
+				fn.call(context || new Dommy(obj.get(0)),
+					obj.get(0), 0, obj.set);
 			} else {
-				for (; i < obj.count(); i++) {
-					fn.call(new Dommy(obj.get(i)), obj.get(i), i, obj.set);
+				for (var i = 0, len = obj.count(); i < len; i++) {
+					fn.call(context || new Dommy(obj.get(i)),
+						obj.get(i), i, obj.set);
 				}
 			}
-
-		// Arrays and NodeLists
 		} else if (isEnum(obj)) {
-			for (; i < obj.length; i++) {
+			for (var i = 0, len = obj.length; i < len; i++) {
 				fn.call(context || obj[i], obj[i], i, obj);
 			}
-
-		// Other objects
 		} else if (isObj(obj)) {
-			for (key in obj) {
+			for (var key in obj) {
 				if (hasOwn.call(obj, key)) {
 					fn.call(context || obj[key], obj[key], key, obj);
 				}
@@ -186,6 +185,37 @@
 		},
 
 		// ### TRAVERSAL
+		is: function (query) {
+			if (!this.count()) { return false; }
+			else if (!query) { return true; }
+
+			var result = false;
+
+			this.each(function (el) {
+				if (matches.call(el, query)) {
+					result = true;
+				}
+			});
+
+			return result;
+		},
+
+		filter: function (query) {
+			if (!this.count() || !query) { return; }
+
+			var set = [];
+
+			this.each(function (el) {
+				if (matches.call(el, query)) {
+					set.push(el);
+				}
+			});
+
+			this.set = set;
+
+			return this;
+		},
+
 		find: function (query) {
 			if (!this.count() || !query) { return; }
 
@@ -200,10 +230,18 @@
 			return this;
 		},
 
-		parent: function () {
+		parent: function (query) {
 			if (!this.count()) { return; }
 
-			this.set = [this.get(0).parentNode];
+			var set = [];
+
+			this.each(function (el) {
+				if (!query || matches.call(el.parentNode, query)) {
+					set.push(el.parentNode);
+				}
+			});
+
+			this.set = set;
 
 			return this;
 		},
@@ -211,7 +249,13 @@
 		children: function (query) {
 			if (!this.count()) { return; }
 
-			this.set = slice.call(this.get(0).children);
+			var set = [];
+
+			this.each(function (el) {
+				set = set.concat(slice.call(el.children));
+			});
+
+			this.set = set;
 
 			return (query) ? this.filter(query) : this;
 		},
@@ -223,23 +267,9 @@
 				set = [];
 
 			this.parent().children().each(function (el) {
-				if (el !== node && (!query || el.matches(query))) {
+				if (el !== node && (!query || matches.call(el, query))) {
 					set.push(el);
 				}
-			});
-
-			this.set = set;
-
-			return this;
-		},
-
-		filter: function (query) {
-			if (!this.count() || !query) { return; }
-
-			var set = [];
-
-			this.each(function (el) {
-				if (el.matches(query)) { set.push(el); }
 			});
 
 			this.set = set;
@@ -352,8 +382,8 @@
 			var rect = this.get(0).getBoundingClientRect();
 
 			return {
-				top: rect.top + document.body.scrollTop,
-				left: rect.left + document.body.scrollLeft
+				top: rect.top + window.document.body.scrollTop,
+				left: rect.left + window.document.body.scrollLeft
 			};
 		},
 
