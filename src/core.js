@@ -279,18 +279,39 @@
 
 		// ### MANIPULATION
 		append: function (node) {
+			var count = this.count();
+
+			if (!count) { return; }
+
 			return this.each(function (el) {
-				el.appendChild(node);
+				el.appendChild((count > 1) ? node.cloneNode(true) : node);
 			});
 		},
 
 		prepend: function (node) {
+			var count = this.count();
+
+			if (!count) { return; }
+
 			return this.each(function (el) {
-				el.insertBefore(node, el.firstChild);
+				el.insertBefore((count > 1) ? node.cloneNode(true) : node,
+					el.firstChild);
+			});
+		},
+
+		remove: function (query) {
+			if (!this.count()) { return; }
+
+			return this.each(function (el) {
+				if (!query || matches.call(el, query)) {
+					el.parentNode.removeChild(el);
+				}
 			});
 		},
 
 		empty: function () {
+			if (!this.count()) { return; }
+
 			return this.each(function (el) {
 				el.innerHTML = '';
 			});
