@@ -461,6 +461,17 @@
 			});
 		},
 
+		once: function (type, fn) {
+			var fx;
+
+			return this.each(function (el) {
+				el.addEventListener(type, fx = function () {
+					fn(arguments);
+					el.removeEventListener(type, fx);
+				});
+			});
+		},
+
 		off: function (type, fn) {
 			return this.each(function (el) {
 				el.removeEventListener(type, fn);
