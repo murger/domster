@@ -7,8 +7,10 @@ Suitable for IE9+\
 https://jsperf.com/domster-vs-qsa
 
 ## API
+* type
+* extend
 * get
-* count
+* size (count, length)
 * each
 * is
 * filter
@@ -27,7 +29,7 @@ https://jsperf.com/domster-vs-qsa
 * data
 * attr
 * removeAttr
-* css
+* style (css)
 * position
 * offset
 * hasClass
@@ -35,6 +37,6 @@ https://jsperf.com/domster-vs-qsa
 * removeClass
 * toggleClass
 * on
-* once
+* once (one)
 * off
 * trigger

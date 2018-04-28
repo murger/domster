@@ -589,6 +589,7 @@
 	// ### ALIASES #############################################################
 
 	domster.prototype.size = domster.prototype.count;
+	domster.prototype.length = domster.prototype.count;
 	domster.prototype.css = domster.prototype.style;
 	domster.prototype.one = domster.prototype.once;
 
