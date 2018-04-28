@@ -113,12 +113,12 @@
 	},
 
 	each = function (obj, fn, context) {
-		if (obj instanceof domster && obj.count()) {
-			if (obj.count() === 1) {
+		if (obj instanceof domster && obj.size()) {
+			if (obj.size() === 1) {
 				fn.call(context || new domster(obj.get(0)),
 					obj.get(0), 0, obj.set);
 			} else {
-				for (var i = 0, len = obj.count(); i < len; i++) {
+				for (var i = 0, len = obj.size(); i < len; i++) {
 					fn.call(context || new domster(obj.get(i)),
 						obj.get(i), i, obj.set);
 				}
@@ -184,7 +184,7 @@
 			return this.set[idx];
 		},
 
-		count: function () {
+		size: function () {
 			return this.set.length;
 		},
 
@@ -200,7 +200,7 @@
 		// ### TRAVERSAL #######################################################
 
 		is: function (query) {
-			if (!this.count()) { return false; }
+			if (!this.size()) { return false; }
 			else if (!query) { return true; }
 
 			var result = false;
@@ -215,7 +215,7 @@
 		},
 
 		first: function () {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			this.set = [this.get(0)];
 
@@ -223,17 +223,17 @@
 		},
 
 		last: function () {
-			var count = this.count();
+			var size = this.size();
 
-			if (!count) { return; }
+			if (!size) { return; }
 
-			this.set = [this.get(count - 1)];
+			this.set = [this.get(size - 1)];
 
 			return this;
 		},
 
 		find: function (query) {
-			if (!this.count() || !query) { return; }
+			if (!this.size() || !query) { return; }
 
 			var set = [];
 
@@ -247,7 +247,7 @@
 		},
 
 		filter: function (query) {
-			if (!this.count() || !query) { return; }
+			if (!this.size() || !query) { return; }
 
 			var set = [];
 
@@ -263,7 +263,7 @@
 		},
 
 		parent: function (query) {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			var set = [];
 
@@ -279,7 +279,7 @@
 		},
 
 		children: function (query) {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			var set = [];
 
@@ -293,7 +293,7 @@
 		},
 
 		siblings: function (query) {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			var node = this.get(0),
 				set = [];
@@ -312,7 +312,7 @@
 		// ### MANIPULATION ####################################################
 
 		remove: function (query) {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			return this.each(function (el) {
 				if (!query || matches.call(el, query)) {
@@ -322,7 +322,7 @@
 		},
 
 		clone: function () {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			var set = [];
 
@@ -336,14 +336,14 @@
 		},
 
 		append: function (node) {
-			var count = this.count(),
-				isMany = (count > 1),
+			var size = this.size(),
+				isMany = (size > 1),
 				isSet = (node instanceof domster),
 				append = function (el, n) {
 					return el.appendChild(isMany ? n.cloneNode(true) : n);
 				};
 
-			if (!count || (!isElement(node) && !isSet)) { return; }
+			if (!size || (!isElement(node) && !isSet)) { return; }
 
 			this.each(function (el) {
 				if (isSet) { node.each(function (n) { append(el, n); }); }
@@ -357,15 +357,15 @@
 		},
 
 		prepend: function (node) {
-			var count = this.count(),
-				isMany = (count > 1),
+			var size = this.size(),
+				isMany = (size > 1),
 				isSet = (node instanceof domster),
 				prepend = function (el, n) {
 					return el.insertBefore(isMany ? n.cloneNode(true) : n,
 						el.firstChild);
 				};
 
-			if (!count || (!isElement(node) && !isSet)) { return; }
+			if (!size || (!isElement(node) && !isSet)) { return; }
 
 			this.each(function (el) {
 				if (isSet) { node.each(function (n) { prepend(el, n); }); }
@@ -379,7 +379,7 @@
 		},
 
 		empty: function () {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			return this.each(function (el) {
 				el.innerHTML = '';
@@ -387,7 +387,7 @@
 		},
 
 		html: function (val) {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			if (val) {
 				return this.each(function (el) {
@@ -399,7 +399,7 @@
 		},
 
 		text: function (val) {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			if (val) {
 				return this.each(function (el) {
@@ -411,7 +411,7 @@
 		},
 
 		val: function (val) {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			if (val) {
 				return this.each(function (el) {
@@ -423,7 +423,7 @@
 		},
 
 		data: function (key, val) {
-			if (!this.count() || !key) { return; }
+			if (!this.size() || !key) { return; }
 
 			if (val) {
 				return this.each(function (el) {
@@ -435,7 +435,7 @@
 		},
 
 		attr: function (key, val) {
-			if (!this.count() || !key) { return; }
+			if (!this.size() || !key) { return; }
 
 			if (val) {
 				return this.each(function (el) {
@@ -447,7 +447,7 @@
 		},
 
 		removeAttr: function (key) {
-			if (!this.count() || !key) { return; }
+			if (!this.size() || !key) { return; }
 
 			return this.each(function (el) {
 				el.removeAttribute(key);
@@ -457,7 +457,7 @@
 		// ### STYLE ###########################################################
 
 		style: function (key, val) {
-			if (!this.count() || !key) { return; }
+			if (!this.size() || !key) { return; }
 
 			var el = this.get(0);
 
@@ -481,7 +481,7 @@
 		toggle: function () {},
 
 		position: function () {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			var el = this.get(0);
 
@@ -492,7 +492,7 @@
 		},
 
 		offset: function () {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			var rect = this.get(0).getBoundingClientRect(),
 				body = window.document.body;
@@ -504,7 +504,7 @@
 		},
 
 		hasClass: function (className) {
-			if (!this.count() || !className) { return; }
+			if (!this.size() || !className) { return; }
 
 			var result = false,
 				pattern = new RegExp("(^|\\s)" + className + "(\\s|$)");
@@ -519,7 +519,7 @@
 		},
 
 		addClass: function (className) {
-			if (!this.count() || !className) { return; }
+			if (!this.size() || !className) { return; }
 
 			return this.each(function (el) {
 				if (!this.hasClass(className)) {
@@ -529,7 +529,7 @@
 		},
 
 		removeClass: function (className) {
-			if (!this.count()) { return; }
+			if (!this.size()) { return; }
 
 			var pattern = new RegExp('\\b' + className + '\\b', 'g');
 
@@ -543,7 +543,7 @@
 		},
 
 		toggleClass: function (className) {
-			if (!this.count() || !className) { return; }
+			if (!this.size() || !className) { return; }
 
 			return this.each(function (el) {
 				if (!this.hasClass(className)) {
@@ -588,10 +588,9 @@
 
 	// ### ALIASES #############################################################
 
-	domster.prototype.size = domster.prototype.count;
-	domster.prototype.length = domster.prototype.count;
-	domster.prototype.css = domster.prototype.style;
 	domster.prototype.one = domster.prototype.once;
+	domster.prototype.css = domster.prototype.style;
+	domster.prototype.length = domster.prototype.size;
 
 	// ### UMD #################################################################
 

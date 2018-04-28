@@ -10,7 +10,7 @@ https://jsperf.com/domster-vs-qsa
 * type
 * extend
 * get
-* size (count, length)
+* size (length)
 * each
 * is
 * filter
