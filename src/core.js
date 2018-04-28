@@ -2,7 +2,7 @@
  *	domster
  *	https://github.com/murger/domster
  *
- *	Copyright 2010, 2018 G Mermer
+ *	Copyright 2012, 2018 G Mermer
  *	Released under the MIT license
  */
 
@@ -18,8 +18,12 @@
 			return new domster(query, context);
 		}
 
-		// TODO: new element <el>
-		if (typeof query === 'string') {
+		var match;
+
+		if (match = /^<([\w]+)>$/.exec(query)) {
+			this.set = create(match[1]);
+		} else if (typeof query === 'string') {
+
 			this.set = select(query, context);
 		} else if (type(query) === 'nodelist') {
 			this.set = query;
@@ -85,7 +89,12 @@
 		return set;
 	},
 
-	// ### SHORTCUTS
+	create = function (tag) {
+		return [window.document.createElement(tag)];
+	},
+
+	// ### SHORTCUTS ###########################################################
+
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
 	concat = Array.prototype.concat,
@@ -93,7 +102,8 @@
 	push = Array.prototype.push,
 	matches = Element.prototype.matches || Element.prototype.msMatchesSelector,
 
-	// ### HELPERS
+	// ### HELPERS #############################################################
+
 	isObj = function (obj) {
 		return (typeof obj === 'object');
 	},
