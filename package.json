@@ -1,0 +1,22 @@
+{
+	"name": "domy.js",
+	"version": "0.3.1",
+	"description": "With performance in mind; domy utilises built-in APIs whilst providing a jQuery-like experience. Forfeiting newer methods in favour of older and better optimised ones, it queries the DOM (at a minimum) **10x** faster.",
+	"main": "dist/domy.min.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://murger@github.com/murger/domy.js.git"
+	},
+	"keywords": [],
+	"author": {
+		"email": "gmermer@gmail.com"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/murger/domy.js/issues"
+	},
+	"homepage": "https://github.com/murger/domy.js"
+}

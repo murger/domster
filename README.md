@@ -1,12 +1,12 @@
-# dommy.js
+# domy.js
 
-With performance in mind; dommy utilises built-in APIs whilst providing
+With performance in mind; domy utilises built-in APIs whilst providing
 a jQuery-like experience.\
 Forfeiting newer methods in favour of older and better
-optimised ones, it queries the DOM (at a minimum) **10x** faster.
+optimised ones, it queries the DOM a lot faster than anything else.
 
 Suitable for IE9+\
-https://jsperf.com/dommy-vs-queryselector
+https://jsperf.com/domy-vs-qsa
 
 ## API
 * get

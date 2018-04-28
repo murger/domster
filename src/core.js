@@ -1,6 +1,6 @@
 /*!
- *	dommy.js
- *	https://github.com/murger/dommy.js
+ *	domy.js
+ *	https://github.com/murger/domy.js
  *
  *	Copyright 2010, 2018 G Mermer
  *	Released under the MIT license
@@ -13,9 +13,9 @@
 		throw new Error();
 	}
 
-	var dommy = function (query, context) {
-		if (!(this instanceof dommy)) {
-			return new dommy(query, context);
+	var domy = function (query, context) {
+		if (!(this instanceof domy)) {
+			return new domy(query, context);
 		}
 
 		// TODO: new element <el>
@@ -25,7 +25,7 @@
 			this.set = query;
 		} else if (isElement(query)) {
 			this.set = [query];
-		} else if (query instanceof dommy) {
+		} else if (query instanceof domy) {
 			this.set = query.set;
 		}
 
@@ -103,13 +103,13 @@
 	},
 
 	each = function (obj, fn, context) {
-		if (obj instanceof dommy && obj.count()) {
+		if (obj instanceof domy && obj.count()) {
 			if (obj.count() === 1) {
-				fn.call(context || new dommy(obj.get(0)),
+				fn.call(context || new domy(obj.get(0)),
 					obj.get(0), 0, obj.set);
 			} else {
 				for (var i = 0, len = obj.count(); i < len; i++) {
-					fn.call(context || new dommy(obj.get(i)),
+					fn.call(context || new domy(obj.get(i)),
 						obj.get(i), i, obj.set);
 				}
 			}
@@ -160,13 +160,13 @@
 	});
 
 	// ### UTILS
-	extend(dommy, {
+	extend(domy, {
 		each: each,
 		extend: extend,
 		type: type
 	});
 
-	extend(dommy.prototype, {
+	extend(domy.prototype, {
 		set: [],
 
 		get: function (idx) {
@@ -433,6 +433,12 @@
 			return this;
 		},
 
+		show: function () {},
+
+		hide: function () {},
+
+		toggle: function () {},
+
 		position: function () {
 			if (!this.count()) { return; }
 
@@ -447,11 +453,12 @@
 		offset: function () {
 			if (!this.count()) { return; }
 
-			var rect = this.get(0).getBoundingClientRect();
+			var rect = this.get(0).getBoundingClientRect(),
+				body = window.document.body;
 
 			return {
-				top: rect.top + window.document.body.scrollTop,
-				left: rect.left + window.document.body.scrollLeft
+				top: rect.top + body.scrollTop,
+				left: rect.left +body.scrollLeft
 			};
 		},
 
@@ -538,10 +545,10 @@
 	});
 
 	if (typeof define === 'function' && define.amd) {
-		define(function () { return dommy; });
+		define(function () { return domy; });
 	} else if (typeof module === 'object' && module.exports) {
-		module.exports = dommy;
+		module.exports = domy;
 	} else {
-		window.$ = dommy;
+		window.$ = domy;
 	}
 })(this);
