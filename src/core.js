@@ -169,7 +169,8 @@
 		typeMap['[object ' + val + ']'] = val.toLowerCase();
 	});
 
-	// ### UTILS
+	// ### UTILITY #############################################################
+
 	extend(domster, {
 		each: each,
 		extend: extend,
@@ -196,7 +197,8 @@
 			return this;
 		},
 
-		// ### TRAVERSAL
+		// ### TRAVERSAL #######################################################
+
 		is: function (query) {
 			if (!this.count()) { return false; }
 			else if (!query) { return true; }
@@ -404,7 +406,6 @@
 					el.innerText = val;
 				});
 			} else {
-				// TODO: combine each
 				return this.get(0).innerText;
 			}
 		},
@@ -453,8 +454,9 @@
 			});
 		},
 
-		// ### CSS
-		css: function (key, val) {
+		// ### STYLE ###########################################################
+
+		style: function (key, val) {
 			if (!this.count() || !key) { return; }
 
 			var el = this.get(0);
@@ -552,7 +554,8 @@
 			});
 		},
 
-		// ### EVENTS
+		// ### EVENTS ##########################################################
+
 		on: function (type, fn) {
 			return this.each(function (el) {
 				el.addEventListener(type, fn);
@@ -582,6 +585,14 @@
 			});
 		}
 	});
+
+	// ### ALIASES #############################################################
+
+	domster.prototype.size = domster.prototype.count;
+	domster.prototype.css = domster.prototype.style;
+	domster.prototype.one = domster.prototype.once;
+
+	// ### UMD #################################################################
 
 	if (typeof define === 'function' && define.amd) {
 		define(function () { return domster; });
