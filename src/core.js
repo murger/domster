@@ -462,7 +462,7 @@
 			var el = this.get(0);
 
 			if (type(key) === 'string' && !val) {
-				return getComputedStyle(el)[key];
+				return window.getComputedStyle(el)[key];
 			} else if (val) {
 				el.style[key] = val;
 			} else if (type(key) === 'object') {
@@ -472,6 +472,14 @@
 			}
 
 			return this;
+		},
+
+		width: function () {
+			return parseInt(this.style('width'));
+		},
+
+		height: function () {
+			return parseInt(this.style('height'));
 		},
 
 		show: function () {},

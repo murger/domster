@@ -30,6 +30,8 @@ https://jsperf.com/domster-vs-qsa
 * attr
 * removeAttr
 * style (css)
+* width
+* height
 * position
 * offset
 * hasClass
