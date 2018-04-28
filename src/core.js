@@ -14,16 +14,15 @@
 	}
 
 	var domster = function (query, context) {
-		if (!(this instanceof domster)) {
+		var match;
+
+		if (!isSet(this)) {
 			return new domster(query, context);
 		}
-
-		var match;
 
 		if (match = /^<([\w]+)>$/.exec(query)) {
 			this.set = create(match[1]);
 		} else if (typeof query === 'string') {
-
 			this.set = select(query, context);
 		} else if (type(query) === 'nodelist') {
 			this.set = query;
@@ -49,6 +48,8 @@
 			nodes,
 			set = [];
 
+		// TODO: if query has a space re-write with context
+
 		if (!context) {
 			context = window.document;
 		} else if (!isElement(context) && !isDocument(context)) {
@@ -65,6 +66,7 @@
 		// [1] -> <tag>
 		// [2] -> <tag> (if .class specified)
 		// [3] -> .class
+		// TODO: attribute selection
 		match = /^(?:([\w]+)|([\w]+)?\.([\w\-]+))$/.exec(query);
 
 		// only <tag>
@@ -104,6 +106,10 @@
 
 	// ### HELPERS #############################################################
 
+	isSet = function (obj) {
+		return (obj instanceof domster);
+	},
+
 	isObj = function (obj) {
 		return (typeof obj === 'object');
 	},
@@ -113,7 +119,7 @@
 	},
 
 	each = function (obj, fn, context) {
-		if (obj instanceof domster && obj.size()) {
+		if (isSet(obj) && obj.size()) {
 			if (obj.size() === 1) {
 				fn.call(context || new domster(obj.get(0)),
 					obj.get(0), 0, obj.set);
@@ -309,7 +315,7 @@
 			return this;
 		},
 
-		// ### MANIPULATION ####################################################
+		// ### MUTATION ########################################################
 
 		remove: function (query) {
 			if (!this.size()) { return; }
@@ -338,7 +344,7 @@
 		append: function (node) {
 			var size = this.size(),
 				isMany = (size > 1),
-				isSet = (node instanceof domster),
+				isSet = isSet(node),
 				append = function (el, n) {
 					return el.appendChild(isMany ? n.cloneNode(true) : n);
 				};
@@ -359,7 +365,7 @@
 		prepend: function (node) {
 			var size = this.size(),
 				isMany = (size > 1),
-				isSet = (node instanceof domster),
+				isSet = isSet(node),
 				prepend = function (el, n) {
 					return el.insertBefore(isMany ? n.cloneNode(true) : n,
 						el.firstChild);
