@@ -307,14 +307,7 @@
 			return this;
 		},
 
-		// ### MANIPULATION
-		empty: function () {
-			if (!this.count()) { return; }
-
-			return this.each(function (el) {
-				el.innerHTML = '';
-			});
-		},
+		// ### MANIPULATION ####################################################
 
 		remove: function (query) {
 			if (!this.count()) { return; }
@@ -324,41 +317,6 @@
 					el.parentNode.removeChild(el);
 				}
 			});
-		},
-
-		append: function (node) {
-			var count = this.count();
-
-			if (!count) { return; }
-
-			// TODO: accept domster sets as well
-			this.each(function (el) {
-				el.appendChild((count > 1) ? node.cloneNode(true) : node);
-			});
-
-			if (count > 1) {
-				node.parentNode.removeChild(node);
-			}
-
-			return this;
-		},
-
-		prepend: function (node) {
-			var count = this.count();
-
-			if (!count) { return; }
-
-			// TODO: accept domster sets as well
-			this.each(function (el) {
-				el.insertBefore((count > 1) ? node.cloneNode(true) : node,
-					el.firstChild);
-			});
-
-			if (count > 1) {
-				node.parentNode.removeChild(node);
-			}
-
-			return this;
 		},
 
 		clone: function () {
@@ -373,6 +331,57 @@
 			this.set = set;
 
 			return this;
+		},
+
+		append: function (node) {
+			var count = this.count(),
+				isMany = (count > 1),
+				isSet = (node instanceof domster),
+				append = function (el, n) {
+					return el.appendChild(isMany ? n.cloneNode(true) : n);
+				};
+
+			if (!count || (!isElement(node) && !isSet)) { return; }
+
+			this.each(function (el) {
+				if (isSet) { node.each(function (n) { append(el, n); }); }
+				else { append(el, node); }
+			});
+
+			if (isSet && isMany) { node.remove(); }
+			else if (isMany) { node.parentNode.removeChild(node); }
+
+			return this;
+		},
+
+		prepend: function (node) {
+			var count = this.count(),
+				isMany = (count > 1),
+				isSet = (node instanceof domster),
+				prepend = function (el, n) {
+					return el.insertBefore(isMany ? n.cloneNode(true) : n,
+						el.firstChild);
+				};
+
+			if (!count || (!isElement(node) && !isSet)) { return; }
+
+			this.each(function (el) {
+				if (isSet) { node.each(function (n) { prepend(el, n); }); }
+				else { prepend(el, node); }
+			});
+
+			if (isSet && isMany) { node.remove(); }
+			else if (isMany) { node.parentNode.removeChild(node); }
+
+			return this;
+		},
+
+		empty: function () {
+			if (!this.count()) { return; }
+
+			return this.each(function (el) {
+				el.innerHTML = '';
+			});
 		},
 
 		html: function (val) {
