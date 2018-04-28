@@ -3,9 +3,9 @@
     if (!window.document) {
         throw new Error();
     }
-    var domy = function(query, context) {
-        if (!(this instanceof domy)) {
-            return new domy(query, context);
+    var domster = function(query, context) {
+        if (!(this instanceof domster)) {
+            return new domster(query, context);
         }
         if (typeof query === "string") {
             this.set = select(query, context);
@@ -13,7 +13,7 @@
             this.set = query;
         } else if (isElement(query)) {
             this.set = [ query ];
-        } else if (query instanceof domy) {
+        } else if (query instanceof domster) {
             this.set = query.set;
         }
         return this;
@@ -50,12 +50,12 @@
     }, isEnum = function(obj) {
         return type(obj) === "array" || type(obj) === "nodelist";
     }, each = function(obj, fn, context) {
-        if (obj instanceof domy && obj.count()) {
+        if (obj instanceof domster && obj.count()) {
             if (obj.count() === 1) {
-                fn.call(context || new domy(obj.get(0)), obj.get(0), 0, obj.set);
+                fn.call(context || new domster(obj.get(0)), obj.get(0), 0, obj.set);
             } else {
                 for (var i = 0, len = obj.count(); i < len; i++) {
-                    fn.call(context || new domy(obj.get(i)), obj.get(i), i, obj.set);
+                    fn.call(context || new domster(obj.get(i)), obj.get(i), i, obj.set);
                 }
             }
         } else if (isEnum(obj)) {
@@ -88,12 +88,12 @@
     each(types.split(" "), function(val) {
         typeMap["[object " + val + "]"] = val.toLowerCase();
     });
-    extend(domy, {
+    extend(domster, {
         each: each,
         extend: extend,
         type: type
     });
-    extend(domy.prototype, {
+    extend(domster.prototype, {
         set: [],
         get: function(idx) {
             return this.set[idx];
@@ -433,11 +433,11 @@
     });
     if (typeof define === "function" && define.amd) {
         define(function() {
-            return domy;
+            return domster;
         });
     } else if (typeof module === "object" && module.exports) {
-        module.exports = domy;
+        module.exports = domster;
     } else {
-        window.$ = domy;
+        window.$ = domster;
     }
 })(this);
