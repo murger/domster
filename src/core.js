@@ -202,18 +202,20 @@
 			return result;
 		},
 
-		filter: function (query) {
-			if (!this.count() || !query) { return; }
+		first: function () {
+			if (!this.count()) { return; }
 
-			var set = [];
+			this.set = [this.get(0)];
 
-			this.each(function (el) {
-				if (matches.call(el, query)) {
-					set.push(el);
-				}
-			});
+			return this;
+		},
 
-			this.set = set;
+		last: function () {
+			var count = this.count();
+
+			if (!count) { return; }
+
+			this.set = [this.get(count - 1)];
 
 			return this;
 		},
@@ -225,6 +227,22 @@
 
 			this.each(function (el) {
 				set = set.concat(slice.call(select(query, el)));
+			});
+
+			this.set = set;
+
+			return this;
+		},
+
+		filter: function (query) {
+			if (!this.count() || !query) { return; }
+
+			var set = [];
+
+			this.each(function (el) {
+				if (matches.call(el, query)) {
+					set.push(el);
+				}
 			});
 
 			this.set = set;
@@ -280,18 +298,12 @@
 		},
 
 		// ### MANIPULATION
-		clone: function () {
+		empty: function () {
 			if (!this.count()) { return; }
 
-			var set = [];
-
-			this.each(function (el) {
-				set.push(el.cloneNode(true));
+			return this.each(function (el) {
+				el.innerHTML = '';
 			});
-
-			this.set = set;
-
-			return this;
 		},
 
 		remove: function (query) {
@@ -337,12 +349,18 @@
 			return this;
 		},
 
-		empty: function () {
+		clone: function () {
 			if (!this.count()) { return; }
 
-			return this.each(function (el) {
-				el.innerHTML = '';
+			var set = [];
+
+			this.each(function (el) {
+				set.push(el.cloneNode(true));
 			});
+
+			this.set = set;
+
+			return this;
 		},
 
 		html: function (val) {
