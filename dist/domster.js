@@ -7,7 +7,10 @@
         if (!(this instanceof domster)) {
             return new domster(query, context);
         }
-        if (typeof query === "string") {
+        var match;
+        if (match = /^<([\w]+)>$/.exec(query)) {
+            this.set = create(match[1]);
+        } else if (typeof query === "string") {
             this.set = select(query, context);
         } else if (type(query) === "nodelist") {
             this.set = query;
@@ -45,6 +48,8 @@
             }
         }
         return set;
+    }, create = function(tag) {
+        return [ window.document.createElement(tag) ];
     }, toString = Object.prototype.toString, hasOwn = Object.prototype.hasOwnProperty, concat = Array.prototype.concat, slice = Array.prototype.slice, push = Array.prototype.push, matches = Element.prototype.matches || Element.prototype.msMatchesSelector, isObj = function(obj) {
         return typeof obj === "object";
     }, isEnum = function(obj) {
@@ -197,14 +202,6 @@
             this.set = set;
             return this;
         },
-        empty: function() {
-            if (!this.count()) {
-                return;
-            }
-            return this.each(function(el) {
-                el.innerHTML = "";
-            });
-        },
         remove: function(query) {
             if (!this.count()) {
                 return;
@@ -214,32 +211,6 @@
                     el.parentNode.removeChild(el);
                 }
             });
-        },
-        append: function(node) {
-            var count = this.count();
-            if (!count) {
-                return;
-            }
-            this.each(function(el) {
-                el.appendChild(count > 1 ? node.cloneNode(true) : node);
-            });
-            if (count > 1) {
-                node.parentNode.removeChild(node);
-            }
-            return this;
-        },
-        prepend: function(node) {
-            var count = this.count();
-            if (!count) {
-                return;
-            }
-            this.each(function(el) {
-                el.insertBefore(count > 1 ? node.cloneNode(true) : node, el.firstChild);
-            });
-            if (count > 1) {
-                node.parentNode.removeChild(node);
-            }
-            return this;
         },
         clone: function() {
             if (!this.count()) {
@@ -251,6 +222,60 @@
             });
             this.set = set;
             return this;
+        },
+        append: function(node) {
+            var count = this.count(), isMany = count > 1, isSet = node instanceof domster, append = function(el, n) {
+                return el.appendChild(isMany ? n.cloneNode(true) : n);
+            };
+            if (!count || !isElement(node) && !isSet) {
+                return;
+            }
+            this.each(function(el) {
+                if (isSet) {
+                    node.each(function(n) {
+                        append(el, n);
+                    });
+                } else {
+                    append(el, node);
+                }
+            });
+            if (isSet && isMany) {
+                node.remove();
+            } else if (isMany) {
+                node.parentNode.removeChild(node);
+            }
+            return this;
+        },
+        prepend: function(node) {
+            var count = this.count(), isMany = count > 1, isSet = node instanceof domster, prepend = function(el, n) {
+                return el.insertBefore(isMany ? n.cloneNode(true) : n, el.firstChild);
+            };
+            if (!count || !isElement(node) && !isSet) {
+                return;
+            }
+            this.each(function(el) {
+                if (isSet) {
+                    node.each(function(n) {
+                        prepend(el, n);
+                    });
+                } else {
+                    prepend(el, node);
+                }
+            });
+            if (isSet && isMany) {
+                node.remove();
+            } else if (isMany) {
+                node.parentNode.removeChild(node);
+            }
+            return this;
+        },
+        empty: function() {
+            if (!this.count()) {
+                return;
+            }
+            return this.each(function(el) {
+                el.innerHTML = "";
+            });
         },
         html: function(val) {
             if (!this.count()) {
@@ -320,7 +345,7 @@
                 el.removeAttribute(key);
             });
         },
-        css: function(key, val) {
+        style: function(key, val) {
             if (!this.count() || !key) {
                 return;
             }
@@ -431,6 +456,9 @@
             });
         }
     });
+    domster.prototype.size = domster.prototype.count;
+    domster.prototype.css = domster.prototype.style;
+    domster.prototype.one = domster.prototype.once;
     if (typeof define === "function" && define.amd) {
         define(function() {
             return domster;
