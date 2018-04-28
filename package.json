@@ -1,15 +1,16 @@
 {
-	"name": "domy.js",
+	"name": "domster",
 	"version": "0.3.2",
-	"description": "featherweight DOM wrapper",
-	"main": "dist/domy.min.js",
+	"description": "Feather-weight, blazing-fast DOM wrapper",
+	"main": "dist/domster.min.js",
+	"unpkg": "dist/domster.min.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"compile": "mkdir -p dist && uglifyjs src/core.js -b -o dist/domy.js && uglifyjs src/core.js -m -c -o dist/domy.min.js"
+		"compile": "mkdir -p dist && uglifyjs src/core.js -b -o dist/domster.js && uglifyjs src/core.js -m -c -o dist/domster.min.js"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://murger@github.com/murger/domy.js.git"
+		"url": "git+https://murger@github.com/murger/domster.git"
 	},
 	"keywords": [],
 	"author": {
@@ -17,9 +18,9 @@
 	},
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/murger/domy.js/issues"
+		"url": "https://github.com/murger/domster/issues"
 	},
-	"homepage": "https://github.com/murger/domy.js",
+	"homepage": "https://github.com/murger/domster",
 	"devDependencies": {
 		"uglify-js": "^3.3.22"
 	}
