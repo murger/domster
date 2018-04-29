@@ -16,7 +16,9 @@
 		"type": "git",
 		"url": "git+https://murger@github.com/murger/domster.git"
 	},
-	"keywords": [],
+	"keywords": [
+		"dom"
+	],
 	"author": {
 		"email": "gmermer@gmail.com"
 	},
@@ -26,6 +28,7 @@
 	},
 	"homepage": "https://github.com/murger/domster",
 	"devDependencies": {
+		"mocha": "^5.1.1",
 		"uglify-js": "^3.3.22"
 	}
 }
