@@ -6,7 +6,7 @@ anything else.
 Suitable for IE9+\
 https://jsperf.com/domster-vs-qsa
 
-Include in your project via `npm i domster` or
+Use in your project via `npm i domster` or
 `<script src="//unpkg.com/domster"></script>`\
 If you require additional functionality, please let me know or simply send a PR.
 
