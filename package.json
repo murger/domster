@@ -1,6 +1,6 @@
 {
 	"name": "domster",
-	"version": "0.3.8",
+	"version": "0.3.9",
 	"description": "Feather-weight, blazing-fast DOM wrapper",
 	"main": "dist/domster.min.js",
 	"unpkg": "dist/domster.min.js",
