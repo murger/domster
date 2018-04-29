@@ -6,8 +6,12 @@
 	"unpkg": "dist/domster.min.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"compile": "mkdir -p dist && uglifyjs src/core.js -b -o dist/domster.js && uglifyjs src/core.js -m -c -o dist/domster.min.js"
+		"build": "mkdir -p dist && uglifyjs src/core.js -b -o dist/domster.js && uglifyjs src/core.js -m -c -o dist/domster.min.js",
+		"prepublish": "npm run build"
 	},
+	"files": [
+		"dist"
+	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://murger@github.com/murger/domster.git"

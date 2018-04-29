@@ -482,12 +482,16 @@
 			return this;
 		},
 
-		width: function () {
-			return parseInt(this.style('width'));
+		width: function (val) {
+			return (!val)
+				? parseInt(this.style('width'))
+				: this.style('width', val);
 		},
 
-		height: function () {
-			return parseInt(this.style('height'));
+		height: function (val) {
+			return (!val)
+				? parseInt(this.style('height'))
+				: this.style('height', val);
 		},
 
 		show: function () {},
