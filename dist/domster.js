@@ -122,7 +122,9 @@
             }
             var result = false;
             this.each(function(el) {
-                if (matches.call(el, query)) {
+                if (isElement(query) && el === query) {
+                    result = true;
+                } else if (matches.call(el, query)) {
                     result = true;
                 }
             });
