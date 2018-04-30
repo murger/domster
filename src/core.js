@@ -36,11 +36,11 @@
 	},
 
 	isElement = function (node) {
-		return (node.nodeType === 1);
+		return node && (node.nodeType === 1);
 	},
 
 	isDocument = function (node) {
-		return (node.nodeType === 9);
+		return node && (node.nodeType === 9);
 	},
 
 	select = function (query, context) {
@@ -63,11 +63,9 @@
 				: [];
 		}
 
-		// [1] -> <tag>
-		// [2] -> <tag> (if .class specified)
-		// [3] -> .class
-		// TODO: attribute selection
+		// [1] -> tag [2] -> tag.class [3] -> .class [4] -> [attr]
 		match = /^(?:([\w]+)|([\w]+)?\.([\w\-]+))$/.exec(query);
+		/^(?:([\w]+)|([\w]+)?\.?([\w\-]+)?\[?([\w\-]*[\=\w\-]+?)?\]?)$/;
 
 		// only <tag>
 		if (match[1]) {

@@ -5,7 +5,7 @@
 	"main": "dist/domster.min.js",
 	"unpkg": "dist/domster.min.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"test": "mocha test/bootstrap.js --recursive test",
 		"build": "mkdir -p dist && uglifyjs src/core.js -b -o dist/domster.js && uglifyjs src/core.js -m -c -o dist/domster.min.js",
 		"prepublish": "npm run build"
 	},
@@ -28,7 +28,9 @@
 	},
 	"homepage": "https://github.com/murger/domster",
 	"devDependencies": {
+		"chai": "^4.1.2",
 		"mocha": "^5.1.1",
-		"uglify-js": "^3.3.22"
+		"puppeteer": "^1.3.0",
+		"uglify-js": "^3.3.23"
 	}
 }
