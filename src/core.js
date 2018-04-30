@@ -119,12 +119,10 @@
 	each = function (obj, fn, context) {
 		if (isSet(obj) && obj.size()) {
 			if (obj.size() === 1) {
-				fn.call(context || new domster(obj.get(0)),
-					obj.get(0), 0, obj.set);
+				fn.call(context || obj.get(0), obj.get(0), 0, obj.set);
 			} else {
 				for (var i = 0, len = obj.size(); i < len; i++) {
-					fn.call(context || new domster(obj.get(i)),
-						obj.get(i), i, obj.set);
+					fn.call(context || obj.get(i), obj.get(i), i, obj.set);
 				}
 			}
 		} else if (isEnum(obj)) {
@@ -540,7 +538,9 @@
 			if (!this.size() || !className) { return; }
 
 			return this.each(function (el) {
-				if (!this.hasClass(className)) {
+				var $el = $(el);
+
+				if (!$el.hasClass(className)) {
 					el.className = [el.className, className].join(' ');
 				}
 			});
@@ -552,7 +552,9 @@
 			var pattern = new RegExp('\\b' + className + '\\b', 'g');
 
 			return this.each(function (el) {
-				if (this.hasClass(className)) {
+				var $el = $(el);
+
+				if ($el.hasClass(className)) {
 					el.className = el.className.replace(pattern, '');
 				} else if (!className) {
 					el.className = '';
@@ -564,11 +566,10 @@
 			if (!this.size() || !className) { return; }
 
 			return this.each(function (el) {
-				if (!this.hasClass(className)) {
-					this.addClass(className);
-				} else {
-					this.removeClass(className);
-				}
+				var $el = $(el);
+
+				if (!$el.hasClass(className)) { $el.addClass(className); }
+				else { $el.removeClass(className); }
 			});
 		},
 
