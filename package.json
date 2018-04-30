@@ -16,9 +16,7 @@
 		"type": "git",
 		"url": "git+https://murger@github.com/murger/domster.git"
 	},
-	"keywords": [
-		"dom"
-	],
+	"keywords": ["browser", "dom"],
 	"author": {
 		"email": "gmermer@gmail.com"
 	},

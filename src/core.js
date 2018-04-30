@@ -2,7 +2,7 @@
  *	domster
  *	https://github.com/murger/domster
  *
- *	Copyright 2012, 2018 G Mermer
+ *	Copyright 2018 Gürhan Mermer
  *	Released under the MIT license
  */
 
