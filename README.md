@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/murger/domster.svg?branch=master)](https://travis-ci.org/murger/domster)
+
 With performance in mind; domster utilises built-in APIs whilst providing
 a jQuery-like experience under 2kb. Forfeiting newer methods in favour of
 older and better optimised ones, it queries the DOM a lot faster than
