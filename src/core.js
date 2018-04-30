@@ -64,8 +64,8 @@
 		}
 
 		// [1] -> tag [2] -> tag.class [3] -> .class [4] -> [attr]
+		// /^(?:([\w]+)|([\w]+)?\.?([\w\-]+)?\[?([\w\-]*[\=\w\-]+?)?\]?)$/;
 		match = /^(?:([\w]+)|([\w]+)?\.([\w\-]+))$/.exec(query);
-		/^(?:([\w]+)|([\w]+)?\.?([\w\-]+)?\[?([\w\-]*[\=\w\-]+?)?\]?)$/;
 
 		// only <tag>
 		if (match[1]) {
@@ -517,7 +517,7 @@
 
 			return {
 				top: rect.top + body.scrollTop,
-				left: rect.left +body.scrollLeft
+				left: rect.left + body.scrollLeft
 			};
 		},
 
