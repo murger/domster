@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/murger/domster.svg?branch=master)](https://travis-ci.org/murger/domster)
-[![Coverage Status](https://coveralls.io/repos/github/murger/domster/badge.svg?branch=master)](https://coveralls.io/github/murger/domster?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/murger/domster/badge.svg?branch=master&service=github)](https://coveralls.io/github/murger/domster?branch=master)
 
 With performance in mind; domster utilises built-in APIs whilst providing
 a jQuery-like experience under 2kb. Forfeiting newer methods in favour of

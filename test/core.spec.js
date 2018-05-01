@@ -138,9 +138,55 @@ describe('.last()', function () {
 describe('.children()', function () {
 	it('should return the children of a node', async function () {
 		let result = await page.evaluate(function () {
-			return $('.container').children().size()
+			return $('.container').children().size();
 		});
 
 		expect(result).to.be.equal(3);
+	});
+});
+
+describe('.hasClass()', function () {
+	it('should return true if the whole set has the class', async function () {
+		let result = await page.evaluate(function () {;
+			return $('.container').hasClass('container')
+		});
+
+		expect(result).to.be.true;
+	});
+});
+
+describe('.addClass()', function () {
+	it('should add a class to a set', async function () {
+		let result = await page.evaluate(function () {;
+			$('#list').children().addClass('mark');
+
+			return document.querySelectorAll('.mark').length
+		});
+
+		expect(result).to.be.equal(5);
+	});
+});
+
+describe('.removeClass()', function () {
+	it('should remove a class from a set', async function () {
+		let result = await page.evaluate(function () {;
+			$('.container').children().removeClass('ticket');
+
+			return document.querySelectorAll('.ticket').length
+		});
+
+		expect(result).to.be.equal(0);
+	});
+});
+
+describe('.toggleClass()', function () {
+	it('should toggle a class on a set', async function () {
+		let result = await page.evaluate(function () {;
+			$('.container').toggleClass('x');
+
+			return document.querySelectorAll('.x').length
+		});
+
+		expect(result).to.be.equal(1);
 	});
 });
