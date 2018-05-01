@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/murger/domster.svg?branch=master)](https://travis-ci.org/murger/domster)
+[![Coverage Status](https://coveralls.io/repos/github/murger/domster/badge.svg?branch=master)](https://coveralls.io/github/murger/domster?branch=master)
 
 With performance in mind; domster utilises built-in APIs whilst providing
 a jQuery-like experience under 2kb. Forfeiting newer methods in favour of
@@ -9,7 +10,7 @@ Suitable for IE9+\
 https://jsperf.com/domster-vs-qsa
 
 Use it via `npm i domster` or `<script src="//unpkg.com/domster"></script>`\
-If you require additional functionality, please let us know or simply send a PR.
+If you encounter a bug or require additional functionality, please let us know.\
 
 ## API
 * type

@@ -53,7 +53,7 @@
 		if (!context) {
 			context = window.document;
 		} else if (!isElement(context) && !isDocument(context)) {
-			context = select(context).get(0);
+			context = select(context)[0];
 		}
 
 		// #id
