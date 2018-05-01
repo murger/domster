@@ -126,17 +126,26 @@
 				fn.call(context || obj.get(0), obj.get(0), 0, obj.set);
 			} else {
 				for (var i = 0, len = obj.size(); i < len; i++) {
-					fn.call(context || obj.get(i), obj.get(i), i, obj.set)
+					var fx = fn.call(context || obj.get(i), obj.get(i), i, obj.set);
+
+					if (fx === false) { break; }
+					else if (fx === true) { continue; }
 				}
 			}
 		} else if (isEnum(obj)) {
 			for (var i = 0, len = obj.length; i < len; i++) {
-				fn.call(context || obj[i], obj[i], i, obj)
+				var fx = fn.call(context || obj[i], obj[i], i, obj);
+
+				if (fx === false) { break; }
+				else if (fx === true) { continue; }
 			}
 		} else if (isObj(obj)) {
 			for (var key in obj) {
 				if (hasOwn.call(obj, key)) {
-					fn.call(context || obj[key], obj[key], key, obj)
+					var fx = fn.call(context || obj[key], obj[key], key, obj);
+
+					if (fx === false) { break; }
+					else if (fx === true) { continue; }
 				}
 			}
 		}
@@ -258,38 +267,6 @@
 			return this;
 		},
 
-		find: function (query) {
-			if (!this.size() || !query) { return; }
-
-			var set = [];
-
-			this.each(function (el) {
-				if (el.children.length > 0) {
-					set = set.concat(slice.call(select(query, el)));
-				}
-			});
-
-			this.set = set;
-
-			return this;
-		},
-
-		filter: function (query) {
-			if (!this.size() || !query) { return; }
-
-			var set = [];
-
-			this.each(function (el) {
-				if (matches.call(el, query)) {
-					set.push(el);
-				}
-			});
-
-			this.set = set;
-
-			return this;
-		},
-
 		parent: function (query) {
 			if (!this.size()) { return; }
 
@@ -336,6 +313,38 @@
 
 			this.parent().children().each(function (el) {
 				if (!~mark.indexOf(el) && (!query || matches.call(el, query))) {
+					set.push(el);
+				}
+			});
+
+			this.set = set;
+
+			return this;
+		},
+
+		find: function (query) {
+			if (!this.size() || !query) { return; }
+
+			var set = [];
+
+			this.each(function (el) {
+				if (el.children.length > 0) {
+					set = set.concat(slice.call(select(query, el)));
+				}
+			});
+
+			this.set = set;
+
+			return this;
+		},
+
+		filter: function (query) {
+			if (!this.size() || !query) { return; }
+
+			var set = [];
+
+			this.each(function (el) {
+				if (matches.call(el, query)) {
 					set.push(el);
 				}
 			});
@@ -502,7 +511,7 @@
 			var el = this.get(0);
 
 			if (type(key) === 'string' && !val) {
-				return window.getComputedStyle(el)[key];
+				return getComputedStyle(el)[key];
 			} else if (val) {
 				el.style[key] = val;
 			} else if (type(key) === 'object') {

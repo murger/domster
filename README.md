@@ -19,11 +19,11 @@ If you encounter a bug or require additional functionality, please let us know.
 * has
 * first
 * last
-* find
-* filter
 * parent
 * children
 * siblings
+* find
+* filter
 
 ## Mutation
 * clone
