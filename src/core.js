@@ -26,7 +26,7 @@
 			this.set = select(query, context);
 		} else if (type(query) === 'nodelist') {
 			this.set = query;
-		} else if (isElement(query)) {
+		} else if (isEl(query)) {
 			this.set = [query];
 		} else if (query instanceof domster) {
 			this.set = query.set;
@@ -35,11 +35,11 @@
 		return this;
 	},
 
-	isElement = function (node) {
+	isEl = function (node) {
 		return node && (node.nodeType === 1);
 	},
 
-	isDocument = function (node) {
+	isDoc = function (node) {
 		return node && (node.nodeType === 9);
 	},
 
@@ -52,7 +52,7 @@
 
 		if (!context) {
 			context = window.document;
-		} else if (!isElement(context) && !isDocument(context)) {
+		} else if (!isEl(context) && !isDoc(context)) {
 			context = select(context)[0];
 		}
 
@@ -93,7 +93,9 @@
 		return [window.document.createElement(tag)];
 	},
 
+	// #########################################################################
 	// ### SHORTCUTS ###########################################################
+	// #########################################################################
 
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
@@ -102,7 +104,9 @@
 	push = Array.prototype.push,
 	matches = Element.prototype.matches || Element.prototype.msMatchesSelector,
 
+	// #########################################################################
 	// ### HELPERS #############################################################
+	// #########################################################################
 
 	isSet = function (obj) {
 		return (obj instanceof domster);
@@ -122,17 +126,17 @@
 				fn.call(context || obj.get(0), obj.get(0), 0, obj.set);
 			} else {
 				for (var i = 0, len = obj.size(); i < len; i++) {
-					fn.call(context || obj.get(i), obj.get(i), i, obj.set);
+					fn.call(context || obj.get(i), obj.get(i), i, obj.set)
 				}
 			}
 		} else if (isEnum(obj)) {
 			for (var i = 0, len = obj.length; i < len; i++) {
-				fn.call(context || obj[i], obj[i], i, obj);
+				fn.call(context || obj[i], obj[i], i, obj)
 			}
 		} else if (isObj(obj)) {
 			for (var key in obj) {
 				if (hasOwn.call(obj, key)) {
-					fn.call(context || obj[key], obj[key], key, obj);
+					fn.call(context || obj[key], obj[key], key, obj)
 				}
 			}
 		}
@@ -171,7 +175,9 @@
 		typeMap['[object ' + val + ']'] = val.toLowerCase();
 	});
 
+	// #########################################################################
 	// ### UTILITY #############################################################
+	// #########################################################################
 
 	extend(domster, {
 		each: each,
@@ -199,7 +205,9 @@
 			return this;
 		},
 
+		// #####################################################################
 		// ### TRAVERSAL #######################################################
+		// #####################################################################
 
 		is: function (query) {
 			if (!this.size()) { return false; }
@@ -222,9 +230,7 @@
 			var result = false;
 
 			this.children().each(function (el) {
-				if (isElement(query) && el === query) {
-					result = true;
-				} else if (!isElement(query) && matches.call(el, query)) {
+				if (matches.call(el, query) || (isEl(query) && el === query)) {
 					result = true;
 				}
 			});
@@ -256,7 +262,11 @@
 			var set = [];
 
 			this.each(function (el) {
-				set = set.concat(slice.call(select(query, el)));
+				each(select(query, el), function (ch) {
+					if (!~set.indexOf(ch)) {
+						set.push(ch);
+					}
+				});
 			});
 
 			this.set = set;
@@ -287,7 +297,9 @@
 
 			this.each(function (el) {
 				if (!query || matches.call(el.parentNode, query)) {
-					set.push(el.parentNode);
+					if (!~set.indexOf(el.parentNode)) {
+						set.push(el.parentNode);
+					}
 				}
 			});
 
@@ -302,22 +314,26 @@
 			var set = [];
 
 			this.each(function (el) {
-				set = set.concat(slice.call(el.children));
+				each(el.children, function (ch) {
+					if (!query || matches.call(ch, query)) {
+						set.push(ch);
+					}
+				});
 			});
 
 			this.set = set;
 
-			return (query) ? this.filter(query) : this;
+			return this;
 		},
 
 		siblings: function (query) {
 			if (!this.size()) { return; }
 
-			var node = this.get(0),
+			var orig = this.set,
 				set = [];
 
 			this.parent().children().each(function (el) {
-				if (el !== node && (!query || matches.call(el, query))) {
+				if (!~orig.indexOf(el) && (!query || matches.call(el, query))) {
 					set.push(el);
 				}
 			});
@@ -327,7 +343,9 @@
 			return this;
 		},
 
+		// #####################################################################
 		// ### MUTATION ########################################################
+		// #####################################################################
 
 		remove: function (query) {
 			if (!this.size()) { return; }
@@ -361,7 +379,7 @@
 					return el.appendChild(isMany ? n.cloneNode(true) : n);
 				};
 
-			if (!size || (!isElement(node) && !isSet)) { return; }
+			if (!size || (!isEl(node) && !isSet)) { return; }
 
 			this.each(function (el) {
 				if (isSet) { node.each(function (n) { append(el, n); }); }
@@ -383,7 +401,7 @@
 						el.firstChild);
 				};
 
-			if (!size || (!isElement(node) && !isSet)) { return; }
+			if (!size || (!isEl(node) && !isSet)) { return; }
 
 			this.each(function (el) {
 				if (isSet) { node.each(function (n) { prepend(el, n); }); }
@@ -472,7 +490,9 @@
 			});
 		},
 
+		// #####################################################################
 		// ### STYLE ###########################################################
+		// #####################################################################
 
 		style: function (key, val) {
 			if (!this.size() || !key) { return; }
@@ -552,7 +572,7 @@
 			if (!this.size() || !className) { return; }
 
 			return this.each(function (el) {
-				var $el = $(el);
+				var $el = new domster(el);
 
 				if (!$el.hasClass(className)) {
 					el.className = [el.className, className].join(' ');
@@ -566,7 +586,7 @@
 			var pattern = new RegExp('\\b' + className + '\\b', 'g');
 
 			return this.each(function (el) {
-				var $el = $(el);
+				var $el = new domster(el);
 
 				if ($el.hasClass(className)) {
 					el.className = el.className.replace(pattern, '');
@@ -580,14 +600,16 @@
 			if (!this.size() || !className) { return; }
 
 			return this.each(function (el) {
-				var $el = $(el);
+				var $el = new domster(el);
 
 				if (!$el.hasClass(className)) { $el.addClass(className); }
 				else { $el.removeClass(className); }
 			});
 		},
 
+		// #####################################################################
 		// ### EVENTS ##########################################################
+		// #####################################################################
 
 		on: function (type, fn) {
 			return this.each(function (el) {
@@ -619,13 +641,19 @@
 		}
 	});
 
+	// #########################################################################
 	// ### ALIASES #############################################################
+	// #########################################################################
 
-	domster.prototype.one = domster.prototype.once;
-	domster.prototype.css = domster.prototype.style;
-	domster.prototype.length = domster.prototype.size;
+	extend(domster.prototype, {
+		one: domster.prototype.once,
+		css: domster.prototype.style,
+		length: domster.prototype.size
+	});
 
+	// #########################################################################
 	// ### UMD #################################################################
+	// #########################################################################
 
 	if (typeof define === 'function' && define.amd) {
 		define(function () { return domster; });
