@@ -12,18 +12,21 @@ https://jsperf.com/domster-vs-qsa
 Use it via `npm i domster` or `<script src="//unpkg.com/domster"></script>`\
 If you encounter a bug or require additional functionality, please let us know.
 
-## API
-* type
-* extend
+## Traversal
 * get
 * size (length)
 * each
 * is
-* filter
+* has
+* first
+* last
 * find
+* filter
 * parent
 * children
 * siblings
+
+## Mutation
 * clone
 * remove
 * append
@@ -35,6 +38,8 @@ If you encounter a bug or require additional functionality, please let us know.
 * data
 * attr
 * removeAttr
+
+## Style
 * style (css)
 * width
 * height
@@ -44,7 +49,14 @@ If you encounter a bug or require additional functionality, please let us know.
 * addClass
 * removeClass
 * toggleClass
+
+## Events
 * on
 * once (one)
 * off
 * trigger
+
+## Utility
+* each
+* type
+* extend
