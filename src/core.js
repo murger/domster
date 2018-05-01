@@ -230,7 +230,9 @@
 			var result = false;
 
 			this.children().each(function (el) {
-				if (matches.call(el, query) || (isEl(query) && el === query)) {
+				if (isEl(query) && el === query) {
+					result = true;
+				} else if (!isEl(query) && matches.call(el, query)) {
 					result = true;
 				}
 			});
