@@ -264,11 +264,9 @@
 			var set = [];
 
 			this.each(function (el) {
-				each(select(query, el), function (ch) {
-					if (!~set.indexOf(ch)) {
-						set.push(ch);
-					}
-				});
+				if (el.children.length > 0) {
+					set = set.concat(slice.call(select(query, el)));
+				}
 			});
 
 			this.set = set;
@@ -298,9 +296,11 @@
 			var set = [];
 
 			this.each(function (el) {
-				if (!query || matches.call(el.parentNode, query)) {
-					if (!~set.indexOf(el.parentNode)) {
-						set.push(el.parentNode);
+				var parent = el.parentNode;
+
+				if (!query || matches.call(parent, query)) {
+					if (!~set.indexOf(parent)) {
+						set.push(parent);
 					}
 				}
 			});
@@ -331,11 +331,11 @@
 		siblings: function (query) {
 			if (!this.size()) { return; }
 
-			var orig = this.set,
+			var mark = this.set,
 				set = [];
 
 			this.parent().children().each(function (el) {
-				if (!~orig.indexOf(el) && (!query || matches.call(el, query))) {
+				if (!~mark.indexOf(el) && (!query || matches.call(el, query))) {
 					set.push(el);
 				}
 			});
