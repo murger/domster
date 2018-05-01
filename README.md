@@ -10,7 +10,7 @@ Suitable for IE9+\
 https://jsperf.com/domster-vs-qsa
 
 Use it via `npm i domster` or `<script src="//unpkg.com/domster"></script>`\
-If you encounter a bug or require additional functionality, please let us know.\
+If you encounter a bug or require additional functionality, please let us know.
 
 ## API
 * type
