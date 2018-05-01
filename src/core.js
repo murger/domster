@@ -205,12 +205,26 @@
 			if (!this.size()) { return false; }
 			else if (!query) { return true; }
 
-			var result = false;
+			var result = true;
 
 			this.each(function (el) {
+				if (!matches.call(el, query)) {
+					result = false;
+				}
+			});
+
+			return result;
+		},
+
+		has: function (query) {
+			if (!this.size() || !query) { return; }
+
+			var result = false;
+
+			this.children().each(function (el) {
 				if (isElement(query) && el === query) {
 					result = true;
-				} else if (matches.call(el, query)) {
+				} else if (!isElement(query) && matches.call(el, query)) {
 					result = true;
 				}
 			});

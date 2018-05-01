@@ -45,7 +45,7 @@ describe('Core', function () {
 });
 
 describe('.get()', function () {
-	it('should return the correct item', async function () {
+	it('should return a specific node in a set', async function () {
 		let result = await page.evaluate(function () {
 			return $('li').get(0) === document.querySelector('li:first-child');
 		});
@@ -55,29 +55,65 @@ describe('.get()', function () {
 });
 
 describe('.size()', function () {
-	it('should return the correct size', async function () {
+	it('should return the count of a set', async function () {
 		let result = await page.evaluate(() => $('li').size());
 
 		expect(result).to.equal(5);
 	});
 });
 
-// describe('.first()', function () {
-// 	it('should return the first item', async function () {
-// 		let result = await page.evaluate(function () {
-// 			return $('li').first() === document.querySelector('li:first-child');
-// 		});
+describe('.is()', function () {
+	it('should return true if there is a set', async function () {
+		let result = await page.evaluate(function () {
+			return $('span').is();
+		});
 
-// 		expect(result).to.be.true;
-// 	});
-// });
+		expect(result).to.be.true;
+	});
 
-// describe('.last()', function () {
-// 	it('should return the last item', async function () {
-// 		let result = await page.evaluate(function () {
-// 			return $('li').last() === document.querySelector('li:last-child');
-// 		});
+	it('should return false if there is no set', async function () {
+		let result = await page.evaluate(function () {
+			return $('template').is();
+		});
 
-// 		expect(result).to.be.true;
-// 	});
-// });
+		expect(result).to.be.false;
+	});
+
+	it('should return true if a set match the query', async function () {
+		let result = await page.evaluate(function () {
+			return $('span').is('.ticket');
+		});
+
+		expect(result).to.be.true;
+	});
+});
+
+describe('.first()', function () {
+	it('should return the first node of a set', async function () {
+		let result = await page.evaluate(function () {
+			return $('li').first().get(0) === document.querySelector('li:first-child');
+		});
+
+		expect(result).to.be.true;
+	});
+});
+
+describe('.last()', function () {
+	it('should return the last node of a set', async function () {
+		let result = await page.evaluate(function () {
+			return $('li').last().get(0) === document.querySelector('li:last-child');
+		});
+
+		expect(result).to.be.true;
+	});
+});
+
+describe('.children()', function () {
+	it('should return the children of a node', async function () {
+		let result = await page.evaluate(function () {
+			return $('.container').children().size()
+		});
+
+		expect(result).to.be.equal(3);
+	});
+});

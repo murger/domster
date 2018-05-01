@@ -7,6 +7,7 @@
 		"test": "rm -rf .nyc_output && mocha test/bootstrap.js test && rm -rf .nyc_output/js",
 		"cover": "nyc report --reporter=lcov && cat ./coverage/lcov.info | coveralls && rm -rf .nyc_output",
 		"build": "mkdir -p dist && uglifyjs src/core.js -b -o dist/domster.js && uglifyjs src/core.js -m -c -o dist/domster.min.js",
+		"postversion": "git push && git push --tags",
 		"prepublish": "npm run build"
 	},
 	"files": [
