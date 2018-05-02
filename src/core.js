@@ -179,9 +179,9 @@
 	typeMap = [],
 
 	type = function (val) {
-		return (!val && val !== '')
-			? String(val) // null & undefined
-			: typeMap[toString.call(val)] || 'object';
+		return (val !== null || val !== undefined)
+			? typeMap[toString.call(val)] || 'object'
+			: String(val);
 	};
 
 	each(types.split(' '), function(val) {
