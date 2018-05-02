@@ -108,6 +108,14 @@
 		return node && (node.nodeType === 1);
 	},
 
+	isStr = function (obj) {
+		return obj && type(obj) === 'string';
+	},
+
+	isNum = function (obj) {
+		return obj && type(obj) === 'number';
+	},
+
 	isDoc = function (node) {
 		return node && (node.nodeType === 9);
 	},
@@ -171,7 +179,7 @@
 	typeMap = [],
 
 	type = function (val) {
-		return (!val)
+		return (!val && val !== '')
 			? String(val) // null & undefined
 			: typeMap[toString.call(val)] || 'object';
 	};
@@ -221,13 +229,14 @@
 		is: function (query) {
 			if (!this.size()) { return false; }
 			else if (!query) { return true; }
+			else if (!isEl(query) && !isStr(query)) { return; }
 
 			var result = true;
 
 			this.each(function (el) {
 				if (isEl(query) && el !== query) {
 					result = false;
-				} else if (!isEl(query) && !matches.call(el, query)) {
+				} else if (isStr(query) && !matches.call(el, query)) {
 					result = false;
 				}
 			});
@@ -253,13 +262,14 @@
 
 		has: function (query) {
 			if (!this.size() || !query) { return; }
+			else if (!isEl(query) && !isStr(query)) { return; }
 
 			var result = false;
 
 			this.children().each(function (el) {
 				if (isEl(query) && el === query) {
 					result = true;
-				} else if (!isEl(query) && matches.call(el, query)) {
+				} else if (isStr(query) && matches.call(el, query)) {
 					result = true;
 				}
 			});
@@ -268,11 +278,13 @@
 		},
 
 		eq: function (idx) {
+			if (!this.size() || !isNum(idx)) { return; }
+
 			var size = this.size(),
 				x = (idx < 0 ? this.size() + idx : idx),
 				el = this.get(x);
 
-			if (!el || !this.size()) { return; }
+			if (!el) { return; }
 
 			this.set = [el];
 
