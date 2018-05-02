@@ -265,6 +265,18 @@
 			return result;
 		},
 
+		eq: function (idx) {
+			var size = this.size(),
+				x = (idx < 0 ? this.size() + idx : idx),
+				el = this.get(x);
+
+			if (!el || !this.size()) { return; }
+
+			this.set = [el];
+
+			return this;
+		},
+
 		first: function () {
 			if (!this.size()) { return; }
 

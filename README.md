@@ -19,6 +19,7 @@ If you encounter a bug or require additional functionality, please let us know.
 * is
 * not
 * has
+* eq
 * first
 * last
 * parent
