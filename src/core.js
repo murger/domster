@@ -315,12 +315,9 @@
 			var set = [];
 
 			this.each(function (el) {
-				var parent = el.parentNode;
-
-				if (!query || matches.call(parent, query)) {
-					if (!~set.indexOf(parent)) {
-						set.push(parent);
-					}
+				var pr = el.parentNode;
+				if ((!query || matches.call(pr, query)) && (!~set.indexOf(pr))) {
+					set.push(pr);
 				}
 			});
 
@@ -354,7 +351,7 @@
 				set = [];
 
 			this.parent().children().each(function (el) {
-				if (!~mark.indexOf(el) && (!query || matches.call(el, query))) {
+				if ((!query || matches.call(el, query)) && !~mark.indexOf(el)) {
 					set.push(el);
 				}
 			});
