@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/murger/domster.svg?branch=master)](https://travis-ci.org/murger/domster)
+[![NPM Version](https://img.shields.io/npm/v/domster.svg)](https://www.npmjs.com/package/domster)
 
 With performance in mind; domster utilises built-in APIs while providing
 a jQuery-like experience around 2kb. Forfeiting newer methods in favour of
