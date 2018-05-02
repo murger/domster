@@ -225,7 +225,9 @@
 			var result = true;
 
 			this.each(function (el) {
-				if (!matches.call(el, query)) {
+				if (isEl(query) && el !== query) {
+					result = false;
+				} else if (!isEl(query) && !matches.call(el, query)) {
 					result = false;
 				}
 			});
