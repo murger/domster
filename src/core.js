@@ -427,43 +427,37 @@
 
 		append: function (node) {
 			var size = this.size(),
-				isMany = (size > 1),
-				isSet = isSet(node),
-				append = function (el, n) {
-					return el.appendChild(isMany ? n.cloneNode(true) : n);
-				};
+				isMany = (size > 1);
 
-			if (!size || (!isEl(node) && !isSet)) { return; }
+			if (!size || (!isEl(node) && !isSet(node))) { return; }
+			else if (isEl(node)) { node = new domster(node); }
 
 			this.each(function (el) {
-				if (isSet) { node.each(function (n) { append(el, n); }); }
-				else { append(el, node); }
+				node.each(function (n) {
+					el.appendChild(isMany ? n.cloneNode(true) : n);
+				});
 			});
 
-			if (isSet && isMany) { node.remove(); }
-			else if (isMany) { node.parentNode.removeChild(node); }
+			if (isMany) { node.remove(); }
 
 			return this;
 		},
 
 		prepend: function (node) {
 			var size = this.size(),
-				isMany = (size > 1),
-				isSet = isSet(node),
-				prepend = function (el, n) {
-					return el.insertBefore(isMany ? n.cloneNode(true) : n,
-						el.firstChild);
-				};
+				isMany = (size > 1);
 
-			if (!size || (!isEl(node) && !isSet)) { return; }
+			if (!size || (!isEl(node) && !isSet(node))) { return; }
+			else if (isEl(node)) { node = new domster(node); }
 
 			this.each(function (el) {
-				if (isSet) { node.each(function (n) { prepend(el, n); }); }
-				else { prepend(el, node); }
+				node.each(function (n) {
+					el.insertBefore(isMany ? n.cloneNode(true) : n,
+						el.firstChild);
+				});
 			});
 
-			if (isSet && isMany) { node.remove(); }
-			else if (isMany) { node.parentNode.removeChild(node); }
+			if (isMany) { node.remove(); }
 
 			return this;
 		},
