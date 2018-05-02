@@ -35,14 +35,6 @@
 		return this;
 	},
 
-	isEl = function (node) {
-		return node && (node.nodeType === 1);
-	},
-
-	isDoc = function (node) {
-		return node && (node.nodeType === 9);
-	},
-
 	select = function (query, context) {
 		var match,
 			nodes,
@@ -112,12 +104,20 @@
 		return (obj instanceof domster);
 	},
 
+	isEl = function (node) {
+		return node && (node.nodeType === 1);
+	},
+
+	isDoc = function (node) {
+		return node && (node.nodeType === 9);
+	},
+
 	isObj = function (obj) {
-		return (typeof obj === 'object');
+		return obj && (typeof obj === 'object');
 	},
 
 	isEnum = function (obj) {
-		return (type(obj) === 'array' || type(obj) === 'nodelist');
+		return obj && (type(obj) === 'array' || type(obj) === 'nodelist');
 	},
 
 	each = function (obj, fn, context) {
@@ -156,13 +156,9 @@
 	extend = function (obj, src, keep) {
 		each(src, function (val, key) {
 			if (isEnum(obj)) {
-				key = (keep)
-					? obj.length // new key
-					: key; // overwrite
+				key = (keep) ? obj.length : key;
 			} else if (isObj(obj) || typeof obj === 'function') {
-				if (keep && hasOwn.call(obj, key)) {
-					return; // don't copy
-				}
+				if (keep && hasOwn.call(obj, key)) { return; }
 			}
 
 			obj[key] = val;
@@ -214,9 +210,13 @@
 			return this;
 		},
 
-		// #####################################################################
-		// ### TRAVERSAL #######################################################
-		// #####################################################################
+		// ####### ######     #    #     # ####### ######   #####  #######
+		//    #    #     #   # #   #     # #       #     # #     # #
+		//    #    #     #  #   #  #     # #       #     # #       #
+		//    #    ######  #     # #     # #####   ######   #####  #####
+		//    #    #   #   #######  #   #  #       #   #         # #
+		//    #    #    #  #     #   # #   #       #    #  #     # #
+		//    #    #     # #     #    #    ####### #     #  #####  #######
 
 		is: function (query) {
 			if (!this.size()) { return false; }
@@ -231,6 +231,22 @@
 			});
 
 			return result;
+		},
+
+		not: function (query) {
+			if (!this.size() || !query) { return; }
+
+			var set = [];
+
+			this.each(function (el) {
+				if (!matches.call(el, query)) {
+					set.push(el);
+				}
+			});
+
+			this.set = set;
+
+			return this;
 		},
 
 		has: function (query) {
@@ -354,9 +370,13 @@
 			return this;
 		},
 
-		// #####################################################################
-		// ### MUTATION ########################################################
-		// #####################################################################
+		// #     # #     # #######    #    ####### #######
+		// ##   ## #     #    #      # #      #    #
+		// # # # # #     #    #     #   #     #    #
+		// #  #  # #     #    #    #     #    #    #####
+		// #     # #     #    #    #######    #    #
+		// #     # #     #    #    #     #    #    #
+		// #     #  #####     #    #     #    #    #######
 
 		remove: function (query) {
 			if (!this.size()) { return; }
@@ -501,9 +521,13 @@
 			});
 		},
 
-		// #####################################################################
-		// ### STYLE ###########################################################
-		// #####################################################################
+		//  #####  ####### #     # #       #######
+		// #     #    #     #   #  #       #
+		// #          #      # #   #       #
+		//  #####     #       #    #       #####
+		//       #    #       #    #       #
+		// #     #    #       #    #       #
+		//  #####     #       #    ####### #######
 
 		style: function (key, val) {
 			if (!this.size() || !key) { return; }
@@ -618,9 +642,13 @@
 			});
 		},
 
-		// #####################################################################
-		// ### EVENTS ##########################################################
-		// #####################################################################
+		// ####### #     # ####### #     # #######
+		// #       #     # #       ##    #    #
+		// #       #     # #       # #   #    #
+		// #####   #     # #####   #  #  #    #
+		// #        #   #  #       #   # #    #
+		// #         # #   #       #    ##    #
+		// #######    #    ####### #     #    #
 
 		on: function (type, fn) {
 			return this.each(function (el) {

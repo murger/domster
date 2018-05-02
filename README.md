@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/murger/domster.svg?branch=master)](https://travis-ci.org/murger/domster)
 
-With performance in mind; domster utilises built-in APIs whilst providing
-a jQuery-like experience under 2kb. Forfeiting newer methods in favour of
+With performance in mind; domster utilises built-in APIs while providing
+a jQuery-like experience around 2kb. Forfeiting newer methods in favour of
 older and better optimised ones, it queries the DOM a lot faster than
 anything else.
 
@@ -16,6 +16,7 @@ If you encounter a bug or require additional functionality, please let us know.
 * size (length)
 * each
 * is
+* not
 * has
 * first
 * last
