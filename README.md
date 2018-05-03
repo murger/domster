@@ -28,10 +28,11 @@ If you encounter a bug or require additional functionality, please let us know.
 * filter
 
 ## Mutation
-* clone
-* remove
 * append
 * prepend
+* replaceWith
+* clone
+* remove
 * empty
 * html
 * text

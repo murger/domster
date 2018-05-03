@@ -316,7 +316,7 @@
 
 			this.each(function (el) {
 				var pr = el.parentNode;
-				if ((!query || matches.call(pr, query)) && (!~set.indexOf(pr))) {
+				if ((!query || matches.call(pr, query)) && !~set.indexOf(pr)) {
 					set.push(pr);
 				}
 			});
@@ -401,30 +401,6 @@
 		// #     # #     #    #    #     #    #    #
 		// #     #  #####     #    #     #    #    #######
 
-		remove: function (query) {
-			if (!this.size()) { return; }
-
-			return this.each(function (el) {
-				if (!query || matches.call(el, query)) {
-					el.parentNode.removeChild(el);
-				}
-			});
-		},
-
-		clone: function () {
-			if (!this.size()) { return; }
-
-			var set = [];
-
-			this.each(function (el) {
-				set.push(el.cloneNode(true));
-			});
-
-			this.set = set;
-
-			return this;
-		},
-
 		append: function (node) {
 			var size = this.size(),
 				isMany = (size > 1);
@@ -460,6 +436,46 @@
 			if (isMany) { node.remove(); }
 
 			return this;
+		},
+
+		replaceWith: function (node) {
+			var size = this.size(),
+				isMany = (size > 1);
+
+			if (!size || (!isEl(node) && !isSet(node))) { return; }
+			else if (isEl(node)) { node = new domster(node); }
+
+			this.each(function (el) {
+				node.each(function (n) {
+					el.parentNode.replaceChild(n, el);
+				});
+			});
+
+			return this;
+		},
+
+		clone: function () {
+			if (!this.size()) { return; }
+
+			var set = [];
+
+			this.each(function (el) {
+				set.push(el.cloneNode(true));
+			});
+
+			this.set = set;
+
+			return this;
+		},
+
+		remove: function (query) {
+			if (!this.size()) { return; }
+
+			return this.each(function (el) {
+				if (!query || matches.call(el, query)) {
+					el.parentNode.removeChild(el);
+				}
+			});
 		},
 
 		empty: function () {
