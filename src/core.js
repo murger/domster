@@ -315,9 +315,10 @@
 			var set = [];
 
 			this.each(function (el) {
-				var pr = el.parentNode;
-				if ((!query || matches.call(pr, query)) && !~set.indexOf(pr)) {
-					set.push(pr);
+				var parent = el.parentNode;
+
+				if ((!query || matches.call(parent, query)) && !~set.indexOf(parent)) {
+					set.push(parent);
 				}
 			});
 
@@ -332,9 +333,9 @@
 			var set = [];
 
 			this.each(function (el) {
-				each(el.children, function (ch) {
-					if (!query || matches.call(ch, query)) {
-						set.push(ch);
+				each(el.children, function (child) {
+					if (!query || matches.call(child, query)) {
+						set.push(child);
 					}
 				});
 			});
@@ -446,10 +447,14 @@
 			else if (isEl(node)) { node = new domster(node); }
 
 			this.each(function (el) {
+				var parent = el.parentNode;
+
 				node.each(function (n) {
-					el.parentNode.replaceChild(n, el);
+					parent.replaceChild(isMany ? n.cloneNode(true) : n, el);
 				});
 			});
+
+			if (isMany) { node.remove(); }
 
 			return this;
 		},
