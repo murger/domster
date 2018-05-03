@@ -2,9 +2,8 @@
 [![NPM Version](https://img.shields.io/npm/v/domster.svg)](https://www.npmjs.com/package/domster)
 
 With performance in mind, domster employs built-in selectors for a jQuery-like
-experience at 2kb.\
-Forfeiting newer methods in favour of better optimised ones, it queries the DOM
-a lot faster than anything else.
+experience at 2kb. Forfeiting newer methods in favour of older and better
+optimised ones, it queries the DOM a lot faster than anything else.
 
 Suitable for IE9+\
 https://jsperf.com/domster-vs-qs

@@ -179,7 +179,7 @@
 	typeMap = [],
 
 	type = function (val) {
-		return (val !== null || val !== undefined)
+		return (val !== null && val !== undefined)
 			? typeMap[toString.call(val)] || 'object'
 			: String(val);
 	};
