@@ -184,7 +184,7 @@
 			: String(val);
 	};
 
-	each(types.split(' '), function(val) {
+	each(types.split(' '), function (val) {
 		typeMap['[object ' + val + ']'] = val.toLowerCase();
 	});
 
