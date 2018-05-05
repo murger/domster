@@ -27,6 +27,8 @@ If you encounter a bug or require additional functionality, please let us know.
 * filter
 
 ## Mutation
+* before
+* after
 * append
 * prepend
 * replaceWith

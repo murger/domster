@@ -108,6 +108,10 @@
 		return node && (node.nodeType === 1);
 	},
 
+	isDoc = function (node) {
+		return node && (node.nodeType === 9);
+	},
+
 	isStr = function (obj) {
 		return obj && type(obj) === 'string';
 	},
@@ -116,16 +120,28 @@
 		return obj && type(obj) === 'number';
 	},
 
-	isDoc = function (node) {
-		return node && (node.nodeType === 9);
-	},
-
 	isObj = function (obj) {
 		return obj && (typeof obj === 'object');
 	},
 
 	isEnum = function (obj) {
 		return obj && (type(obj) === 'array' || type(obj) === 'nodelist');
+	},
+
+	mutate = function (node, iterator, context) {
+		var size = context.size(),
+			isMulti = (size > 1);
+
+		if (!size || (!isEl(node) && !isSet(node))) { return; }
+		else if (isEl(node)) { node = new domster(node); }
+
+		context.each(function (el) {
+			return iterator(el, node, isMulti);
+		});
+
+		if (isMulti) { node.remove(); }
+
+		return context;
 	},
 
 	each = function (obj, fn, context) {
@@ -402,61 +418,52 @@
 		// #     # #     #    #    #     #    #    #
 		// #     #  #####     #    #     #    #    #######
 
-		append: function (node) {
-			var size = this.size(),
-				isMany = (size > 1);
+		before: function (node) {
+			return mutate(node, function (el, set, isMulti) {
+				var parent = el.parentNode;
 
-			if (!size || (!isEl(node) && !isSet(node))) { return; }
-			else if (isEl(node)) { node = new domster(node); }
-
-			this.each(function (el) {
-				node.each(function (n) {
-					el.appendChild(isMany ? n.cloneNode(true) : n);
+				set.each(function (n) {
+					parent.insertBefore(isMulti ? n.cloneNode(true) : n, el);
 				});
-			});
+			}, this);
+		},
 
-			if (isMany) { node.remove(); }
+		after: function (node) {
+			return mutate(node, function (el, set, isMulti) {
+				var parent = el.parentNode;
 
-			return this;
+				set.each(function (n) {
+					parent.insertBefore(isMulti ? n.cloneNode(true) : n,
+						el.nextSibling);
+				});
+			}, this);
+		},
+
+		append: function (node) {
+			return mutate(node, function (el, set, isMulti) {
+				set.each(function (n) {
+					el.appendChild(isMulti ? n.cloneNode(true) : n);
+				});
+			}, this);
 		},
 
 		prepend: function (node) {
-			var size = this.size(),
-				isMany = (size > 1);
-
-			if (!size || (!isEl(node) && !isSet(node))) { return; }
-			else if (isEl(node)) { node = new domster(node); }
-
-			this.each(function (el) {
-				node.each(function (n) {
-					el.insertBefore(isMany ? n.cloneNode(true) : n,
+			return mutate(node, function (el, set, isMulti) {
+				set.each(function (n) {
+					el.insertBefore(isMulti ? n.cloneNode(true) : n,
 						el.firstChild);
 				});
-			});
-
-			if (isMany) { node.remove(); }
-
-			return this;
+			}, this);
 		},
 
 		replaceWith: function (node) {
-			var size = this.size(),
-				isMany = (size > 1);
-
-			if (!size || (!isEl(node) && !isSet(node))) { return; }
-			else if (isEl(node)) { node = new domster(node); }
-
-			this.each(function (el) {
+			return mutate(node, function (el, set, isMulti) {
 				var parent = el.parentNode;
 
-				node.each(function (n) {
-					parent.replaceChild(isMany ? n.cloneNode(true) : n, el);
+				set.each(function (n) {
+					parent.replaceChild(isMulti ? n.cloneNode(true) : n, el);
 				});
-			});
-
-			if (isMany) { node.remove(); }
-
-			return this;
+			}, this);
 		},
 
 		clone: function () {
