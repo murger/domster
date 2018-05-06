@@ -85,15 +85,25 @@
 		return set;
 	},
 
-	mutate = function (node, iterator, set) {
-		if (!set.size()) { return; }
+	mutate = function (node, iterator, obj) {
+		if (!obj.size()) { return; }
 		else if (!isEl(node) && !isList(node) && !isSet(node)) { return; }
 		else if (isEl(node) || isList(node)) { node = new domster(node); }
 
-		set.each(function (el) { return iterator(el, node); });
+		obj.each(function (el) { return iterator(el, node); });
 		node.remove();
 
-		return set;
+		return obj;
+	},
+
+	transform = function (iterator, obj, group) {
+		var set = [],
+			group = group || obj;
+
+		group.each(function (el) { return iterator(el, set); });
+		obj.set = set;
+
+		return obj;
 	},
 
 	// #########################################################################
@@ -263,22 +273,6 @@
 			return result;
 		},
 
-		not: function (query) {
-			if (!this.size() || !query) { return; }
-
-			var set = [];
-
-			this.each(function (el) {
-				if (!matches.call(el, query)) {
-					set.push(el);
-				}
-			});
-
-			this.set = set;
-
-			return this;
-		},
-
 		has: function (query) {
 			if (!this.size() || !query) { return; }
 			else if (!isEl(query) && !isStr(query)) { return; }
@@ -294,6 +288,16 @@
 			});
 
 			return result;
+		},
+
+		not: function (query) {
+			if (!this.size() || !query) { return; }
+
+			return transform(function (el, set) {
+				if (!matches.call(el, query)) {
+					set.push(el);
+				}
+			}, this);
 		},
 
 		eq: function (idx) {
@@ -331,86 +335,57 @@
 		parent: function (query) {
 			if (!this.size()) { return; }
 
-			var set = [];
-
-			this.each(function (el) {
+			return transform(function (el, set) {
 				var parent = el.parentNode;
 
-				if ((!query || matches.call(parent, query)) && !~set.indexOf(parent)) {
+				if (!~set.indexOf(parent) && (!query || matches.call(parent, query))) {
 					set.push(parent);
 				}
-			});
-
-			this.set = set;
-
-			return this;
+			}, this);
 		},
 
 		children: function (query) {
 			if (!this.size()) { return; }
 
-			var set = [];
-
-			this.each(function (el) {
+			return transform(function (el, set) {
 				each(el.children, function (child) {
 					if (!query || matches.call(child, query)) {
 						set.push(child);
 					}
 				});
-			});
-
-			this.set = set;
-
-			return this;
+			}, this);
 		},
 
 		siblings: function (query) {
 			if (!this.size()) { return; }
 
-			var mark = this.set,
-				set = [];
+			var mark = this.set;
 
-			this.parent().children().each(function (el) {
-				if ((!query || matches.call(el, query)) && !~mark.indexOf(el)) {
+			return transform(function (el, set) {
+				if (!~mark.indexOf(el) && (!query || matches.call(el, query))) {
 					set.push(el);
 				}
-			});
-
-			this.set = set;
-
-			return this;
+			}, this, this.parent().children());
 		},
 
 		find: function (query) {
 			if (!this.size() || !query) { return; }
 
-			var set = [];
-
-			this.each(function (el) {
+			return transform(function (el, set) {
 				if (el.children.length > 0) {
-					set = set.concat(slice.call(select(query, el)));
+					extend(set, slice.call(select(query, el)), true);
 				}
-			});
-
-			this.set = set;
-
-			return this;
+			}, this);
 		},
 
 		filter: function (query) {
 			if (!this.size() || !query) { return; }
 
-			var set = [];
-
-			this.each(function (el) {
+			return transform(function (el, set) {
 				if (matches.call(el, query)) {
 					set.push(el);
 				}
-			});
-
-			this.set = set;
-
-			return this;
+			}, this);
 		},
 
 		// #     # #     # #######    #    ####### #######
@@ -432,6 +407,7 @@
 		after: function (node) {
 			return mutate(node, function (el, set) {
 				var mark = el.nextSibling;
+
 				set.each(function (n) {
 					el.parentNode.insertBefore(n.cloneNode(true), mark);
 				});
@@ -465,15 +441,9 @@
 		clone: function () {
 			if (!this.size()) { return; }
 
-			var set = [];
-
-			this.each(function (el) {
+			return transform(function (el, set) {
 				set.push(el.cloneNode(true));
-			});
-
-			this.set = set;
-
-			return this;
+			}, this);
 		},
 
 		remove: function (query) {
