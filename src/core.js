@@ -24,7 +24,7 @@
 			this.set = create(match[1]);
 		} else if (typeof query === 'string') {
 			this.set = select(query, context);
-		} else if (type(query) === 'nodelist') {
+		} else if (isList(query)) {
 			this.set = query;
 		} else if (isEl(query)) {
 			this.set = [query];
@@ -86,8 +86,9 @@
 	},
 
 	mutate = function (node, iterator, set) {
-		if (!set.size() || (!isEl(node) && !isSet(node))) { return; }
-		else if (isEl(node)) { node = new domster(node); }
+		if (!set.size()) { return; }
+		else if (!isEl(node) && !isList(node) && !isSet(node)) { return; }
+		else if (isEl(node) || isList(node)) { node = new domster(node); }
 
 		set.each(function (el) { return iterator(el, node); });
 		node.remove();
@@ -130,12 +131,20 @@
 		return obj && type(obj) === 'number';
 	},
 
-	isObj = function (obj) {
-		return obj && (typeof obj === 'object');
+	isArray = function (obj) {
+		return obj && (type(obj) === 'array');
+	},
+
+	isList = function (obj) {
+		return obj && (type(obj) === 'nodelist' || type(obj) === 'htmlcollection');
 	},
 
 	isEnum = function (obj) {
-		return obj && (type(obj) === 'array' || type(obj) === 'nodelist');
+		return obj && (isArray(obj) || isList(obj));
+	},
+
+	isObj = function (obj) {
+		return obj && (typeof obj === 'object');
 	},
 
 	each = function (obj, fn, context) {
@@ -185,7 +194,7 @@
 		return obj;
 	},
 
-	types = 'Boolean Number String Function Array Date RegExp NodeList Object',
+	types = 'Boolean Number String Function Array Date RegExp NodeList HTMLCollection Object',
 	typeMap = [],
 
 	type = function (val) {
