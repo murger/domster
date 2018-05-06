@@ -6,7 +6,7 @@
 	"scripts": {
 		"test": "rm -rf .nyc_output && mocha test/bootstrap.js test && rm -rf .nyc_output/js",
 		"cover": "nyc report --reporter=lcov && cat ./coverage/lcov.info | coveralls && rm -rf .nyc_output",
-		"minify": "mkdir -p dist && uglifyjs src/core.js -b -o dist/domster.js && uglifyjs src/core.js -m -c -o dist/domster.min.js",
+		"minify": "mkdir -p dist && uglifyjs src/core.js -m -c -o dist/domster.min.js",
 		"prepack": "npm run minify",
 		"postversion": "git push && git push --tags"
 	},
