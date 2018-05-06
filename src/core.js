@@ -35,6 +35,10 @@
 		return this;
 	},
 
+	create = function (tag) {
+		return [window.document.createElement(tag)];
+	},
+
 	select = function (query, context) {
 		var match,
 			nodes,
@@ -81,8 +85,14 @@
 		return set;
 	},
 
-	create = function (tag) {
-		return [window.document.createElement(tag)];
+	mutate = function (node, iterator, set) {
+		if (!set.size() || (!isEl(node) && !isSet(node))) { return; }
+		else if (isEl(node)) { node = new domster(node); }
+
+		set.each(function (el) { return iterator(el, node); });
+		node.remove();
+
+		return set;
 	},
 
 	// #########################################################################
@@ -126,22 +136,6 @@
 
 	isEnum = function (obj) {
 		return obj && (type(obj) === 'array' || type(obj) === 'nodelist');
-	},
-
-	mutate = function (node, iterator, context) {
-		var size = context.size(),
-			isMulti = (size > 1);
-
-		if (!size || (!isEl(node) && !isSet(node))) { return; }
-		else if (isEl(node)) { node = new domster(node); }
-
-		context.each(function (el) {
-			return iterator(el, node, isMulti);
-		});
-
-		if (isMulti) { node.remove(); }
-
-		return context;
 	},
 
 	each = function (obj, fn, context) {
@@ -419,49 +413,43 @@
 		// #     #  #####     #    #     #    #    #######
 
 		before: function (node) {
-			return mutate(node, function (el, set, isMulti) {
-				var parent = el.parentNode;
-
+			return mutate(node, function (el, set) {
 				set.each(function (n) {
-					parent.insertBefore(isMulti ? n.cloneNode(true) : n, el);
+					el.parentNode.insertBefore(n.cloneNode(true), el);
 				});
 			}, this);
 		},
 
 		after: function (node) {
-			return mutate(node, function (el, set, isMulti) {
-				var parent = el.parentNode;
-
+			return mutate(node, function (el, set) {
 				set.each(function (n) {
-					parent.insertBefore(isMulti ? n.cloneNode(true) : n,
-						el.nextSibling);
+					el.parentNode.insertBefore(n.cloneNode(true), el.nextSibling);
 				});
 			}, this);
 		},
 
 		append: function (node) {
-			return mutate(node, function (el, set, isMulti) {
+			return mutate(node, function (el, set) {
 				set.each(function (n) {
-					el.appendChild(isMulti ? n.cloneNode(true) : n);
+					el.appendChild(n.cloneNode(true));
 				});
 			}, this);
 		},
 
 		prepend: function (node) {
-			return mutate(node, function (el, set, isMulti) {
+			return mutate(node, function (el, set) {
 				set.each(function (n) {
-					el.insertBefore(isMulti ? n.cloneNode(true) : n,
-						el.firstChild);
+					el.insertBefore(n.cloneNode(true), el.firstChild);
 				});
 			}, this);
 		},
 
 		replaceWith: function (node) {
-			return mutate(node, function (el, set, isMulti) {
+			return mutate(node, function (el, set) {
 				var parent = el.parentNode;
 
 				set.each(function (n) {
-					parent.replaceChild(isMulti ? n.cloneNode(true) : n, el);
+					parent.replaceChild(n.cloneNode(true), el);
 				});
 			}, this);
 		},
@@ -484,7 +472,7 @@
 			if (!this.size()) { return; }
 
 			return this.each(function (el) {
-				if (!query || matches.call(el, query)) {
+				if (el.parentNode && (!query || matches.call(el, query))) {
 					el.parentNode.removeChild(el);
 				}
 			});
