@@ -422,8 +422,9 @@
 
 		after: function (node) {
 			return mutate(node, function (el, set) {
+				var mark = el.nextSibling;
 				set.each(function (n) {
-					el.parentNode.insertBefore(n.cloneNode(true), el.nextSibling);
+					el.parentNode.insertBefore(n.cloneNode(true), mark);
 				});
 			}, this);
 		},
