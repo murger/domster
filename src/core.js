@@ -16,7 +16,7 @@
 	var domster = function (query, context) {
 		var match;
 
-		if (!isSet(this)) {
+		if (!this) {
 			return new domster(query, context);
 		}
 
@@ -194,14 +194,14 @@
 		return obj;
 	},
 
-	types = 'Boolean Number String Function Array Date RegExp NodeList HTMLCollection Object',
-	typeMap = [],
-
 	type = function (val) {
 		return (val !== null && val !== undefined)
 			? typeMap[toString.call(val)] || 'object'
 			: String(val);
-	};
+	},
+
+	types = 'Boolean Number String Function Array Date RegExp NodeList HTMLCollection Object',
+	typeMap = [];
 
 	each(types.split(' '), function (val) {
 		typeMap['[object ' + val + ']'] = val.toLowerCase();
@@ -456,10 +456,8 @@
 
 		replaceWith: function (node) {
 			return mutate(node, function (el, set) {
-				var parent = el.parentNode;
-
 				set.each(function (n) {
-					parent.replaceChild(n.cloneNode(true), el);
+					el.parentNode.replaceChild(n.cloneNode(true), el);
 				});
 			}, this);
 		},
