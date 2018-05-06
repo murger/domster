@@ -471,11 +471,17 @@
 		remove: function (query) {
 			if (!this.size()) { return; }
 
-			return this.each(function (el) {
+			var i = this.set.length,
+				el;
+
+			while (i--) {
+				el = this.set[i];
 				if (el.parentNode && (!query || matches.call(el, query))) {
 					el.parentNode.removeChild(el);
 				}
-			});
+			}
+
+			return this;
 		},
 
 		empty: function () {
