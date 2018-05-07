@@ -41,12 +41,12 @@
 
 	select = function (query, context) {
 		var match,
-			nodes,
+			found,
 			set = [];
 
-		// TODO: if query has a space re-write with context
-
-		if (!context) {
+		if (match = /^([#\.\w]+)\s+([#\.\w]+)$/.exec(query)) {
+			return select(match[2], match[1]);
+		} else if (!context) {
 			context = window.document;
 		} else if (!isEl(context) && !isDoc(context)) {
 			context = select(context)[0];
@@ -68,17 +68,17 @@
 			return context.getElementsByTagName(match[1]);
 		}
 
-		nodes = context.getElementsByClassName(match[3]);
+		found = context.getElementsByClassName(match[3]);
 
 		// only .class
 		if (!match[2]) {
-			return nodes;
+			return found;
 		}
 
 		// <tag> & .class
-		for (var i = 0, len = nodes.length; i < len; i++) {
-			if (nodes[i].nodeName === match[2].toUpperCase()) {
-				set.push(nodes[i]);
+		for (var i = 0, len = found.length; i < len; i++) {
+			if (found[i].nodeName === match[2].toUpperCase()) {
+				set.push(found[i]);
 			}
 		}
 
