@@ -40,12 +40,12 @@
 	},
 
 	select = function (query, context) {
-		var match,
+		var map,
 			found,
 			set = [];
 
-		if (match = /^([#\.\w]+)\s+([#\.\w]+)$/.exec(query)) {
-			return select(match[2], match[1]);
+		if (map = /^([#\.\w]+)\s+([#\.\w]+)$/.exec(query)) {
+			return select(map[2], map[1]);
 		} else if (!context) {
 			context = window.document;
 		} else if (!isEl(context) && !isDoc(context)) {
@@ -53,35 +53,27 @@
 		}
 
 		// #id
-		if (match = /^#([\w\-]+)$/.exec(query)) {
-			return (set = context.getElementById(match[1]))
-				? [set]
-				: [];
+		if (map = /^#([\w\-]+)$/.exec(query)) {
+			return (set = context.getElementById(map[1])) ? [set] : [];
 		}
 
-		// [1] -> tag [2] -> tag.class [3] -> .class [4] -> [attr]
-		// /^(?:([\w]+)|([\w]+)?\.?([\w\-]+)?\[?([\w\-]*[\=\w\-]+?)?\]?)$/;
-		match = /^(?:([\w]+)|([\w]+)?\.([\w\-]+))$/.exec(query);
+		// [1] -> tag [2] -> tag.class [3] -> .class
+		map = /^(?:([\w]+)|([\w]+)?\.([\w\-]+))$/.exec(query);
 
-		// only <tag>
-		if (match[1]) {
-			return context.getElementsByTagName(match[1]);
-		}
+		if (!map) { return context.querySelectorAll(query); } // Fallback
+		if (map[1]) { return context.getElementsByTagName(map[1]); } // only <tag>
 
-		found = context.getElementsByClassName(match[3]);
+		found = context.getElementsByClassName(map[3]);
 
-		// only .class
-		if (!match[2]) {
-			return found;
-		}
+		if (!map[2]) { return found; } // only .class
 
-		// <tag> & .class
 		for (var i = 0, len = found.length; i < len; i++) {
-			if (found[i].nodeName === match[2].toUpperCase()) {
+			if (found[i].nodeName === map[2].toUpperCase()) {
 				set.push(found[i]);
 			}
 		}
 
+		// <tag> & .class
 		return set;
 	},
 
