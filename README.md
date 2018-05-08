@@ -19,6 +19,7 @@ If you encounter a bug or require additional functionality, please let us know.
 * eq
 * first
 * last
+* ancestor (closest)
 * parent
 * children
 * siblings

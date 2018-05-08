@@ -306,6 +306,22 @@
 			return this;
 		},
 
+		ancestor: function (query) {
+			if (!this.size() || !query) { return; }
+
+			return transform(function (el, set) {
+				var parent = el.parentNode;
+
+				for (; !isDoc(parent); parent = parent.parentNode) {
+					if (!!~set.indexOf(parent)) {
+						break;
+					} else if (matches.call(parent, query)) {
+						set.push(parent); break;
+					}
+				}
+			}, this);
+		},
+
 		parent: function (query) {
 			if (!this.size()) { return; }
 
@@ -658,6 +674,7 @@
 	// #########################################################################
 
 	extend(domster.prototype, {
+		closest: domster.prototype.ancestor,
 		replaceWith: domster.prototype.swap,
 		one: domster.prototype.once,
 		css: domster.prototype.style,
