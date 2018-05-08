@@ -264,23 +264,6 @@
 			return result;
 		},
 
-		has: function (query) {
-			if (!this.size() || !query) { return; }
-			else if (!isEl(query) && !isStr(query)) { return; }
-
-			var result = false;
-
-			this.children().each(function (el) {
-				if (isEl(query) && el === query) {
-					result = true;
-				} else if (isStr(query) && matches.call(el, query)) {
-					result = true;
-				}
-			});
-
-			return result;
-		},
-
 		not: function (query) {
 			if (!this.size() || !query) { return; }
 

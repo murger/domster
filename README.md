@@ -15,7 +15,6 @@ If you encounter a bug or require additional functionality, please let us know.
 * size (length)
 * each
 * is
-* has
 * not
 * eq
 * first
@@ -25,9 +24,6 @@ If you encounter a bug or require additional functionality, please let us know.
 * siblings
 * find
 * filter
-
-> `.is()` and `.has()` implementations differ from jQuery,\
-> both methods accept elements or a selector and return a boolean.
 
 ## Mutation
 * before
