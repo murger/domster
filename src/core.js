@@ -60,12 +60,12 @@
 		// [1] -> tag [2] -> tag.class [3] -> .class
 		map = /^(?:([\w]+)|([\w]+)?\.([\w\-]+))$/.exec(query);
 
-		if (!map) { return context.querySelectorAll(query); } // Fallback
-		if (map[1]) { return context.getElementsByTagName(map[1]); } // only <tag>
+		if (!map) { return context.querySelectorAll(query); } // fallback
+		if (map[1]) { return context.getElementsByTagName(map[1]); } // tag
 
 		found = context.getElementsByClassName(map[3]);
 
-		if (!map[2]) { return found; } // only .class
+		if (!map[2]) { return found; } // .class
 
 		for (var i = 0, len = found.length; i < len; i++) {
 			if (found[i].nodeName === map[2].toUpperCase()) {
@@ -73,8 +73,7 @@
 			}
 		}
 
-		// <tag> & .class
-		return set;
+		return set; // tag.class
 	},
 
 	mutate = function (node, iterator, obj) {
@@ -555,24 +554,6 @@
 
 			return this;
 		},
-
-		width: function (val) {
-			return (!val)
-				? parseInt(this.style('width'))
-				: this.style('width', val);
-		},
-
-		height: function (val) {
-			return (!val)
-				? parseInt(this.style('height'))
-				: this.style('height', val);
-		},
-
-		show: function () {},
-
-		hide: function () {},
-
-		toggle: function () {},
 
 		position: function () {
 			if (!this.size()) { return; }
