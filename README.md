@@ -30,7 +30,7 @@ If you encounter a bug or require additional functionality, please let us know.
 * after
 * append
 * prepend
-* replaceWith
+* swap (replaceWith)
 * clone
 * remove
 * empty

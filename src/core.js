@@ -404,7 +404,7 @@
 			}, this);
 		},
 
-		replaceWith: function (node) {
+		swap: function (node) {
 			return mutate(node, function (el, set) {
 				set.each(function (n) {
 					el.parentNode.replaceChild(n.cloneNode(true), el);
@@ -658,6 +658,7 @@
 	// #########################################################################
 
 	extend(domster.prototype, {
+		replaceWith: domster.prototype.swap,
 		one: domster.prototype.once,
 		css: domster.prototype.style,
 		length: domster.prototype.size
