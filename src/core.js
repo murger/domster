@@ -16,7 +16,7 @@
 	var domster = function (query, context) {
 		var match;
 
-		if (!this) {
+		if (!isSet(this)) {
 			return new domster(query, context);
 		}
 
