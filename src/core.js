@@ -312,11 +312,13 @@
 			return transform(function (el, set) {
 				var parent = el.parentNode;
 
-				for (; !isDoc(parent); parent = parent.parentNode) {
+				while (!isDoc(parent)) {
 					if (!!~set.indexOf(parent)) {
 						break;
 					} else if (matches.call(parent, query)) {
 						set.push(parent); break;
+					} else {
+						parent = parent.parentNode;
 					}
 				}
 			}, this);
@@ -334,18 +336,6 @@
 			}, this);
 		},
 
-		children: function (query) {
-			if (!this.size()) { return; }
-
-			return transform(function (el, set) {
-				each(el.children, function (child) {
-					if (!query || matches.call(child, query)) {
-						set.push(child);
-					}
-				});
-			}, this);
-		},
-
 		siblings: function (query) {
 			if (!this.size()) { return; }
 
@@ -356,6 +346,18 @@
 					set.push(el);
 				}
 			}, this, this.parent().children());
+		},
+
+		children: function (query) {
+			if (!this.size()) { return; }
+
+			return transform(function (el, set) {
+				each(el.children, function (child) {
+					if (!query || matches.call(child, query)) {
+						set.push(child);
+					}
+				});
+			}, this);
 		},
 
 		find: function (query) {
