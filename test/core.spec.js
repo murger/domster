@@ -88,33 +88,6 @@ describe('.is()', function () {
 	});
 });
 
-describe('.has()', function () {
-	it('should return true if any of the children match the query', async function () {
-		let result = await page.evaluate(function () {
-			return $('.container').has('.active');
-		});
-
-		expect(result).to.be.true;
-	});
-
-	it('should return false if none of the children match the query', async function () {
-		let result = await page.evaluate(function () {
-			return $('.container').has('.pink');
-		});
-
-		expect(result).to.be.false;
-	});
-
-	it('should work with nodes', async function () {
-		let result = await page.evaluate(function () {
-			var node = document.querySelector('.active');
-			return $('.container').has(node);
-		});
-
-		expect(result).to.be.true;
-	});
-});
-
 describe('.first()', function () {
 	it('should return the first node of a set', async function () {
 		let result = await page.evaluate(function () {
