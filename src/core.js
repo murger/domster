@@ -124,6 +124,10 @@
 		return node && (node.nodeType === 9);
 	},
 
+	isList = function (obj) {
+		return obj && (type(obj) === 'nodelist' || type(obj) === 'htmlcollection');
+	},
+
 	isStr = function (obj) {
 		return obj && type(obj) === 'string';
 	},
@@ -134,10 +138,6 @@
 
 	isArray = function (obj) {
 		return obj && (type(obj) === 'array');
-	},
-
-	isList = function (obj) {
-		return obj && (type(obj) === 'nodelist' || type(obj) === 'htmlcollection');
 	},
 
 	isEnum = function (obj) {
@@ -583,7 +583,7 @@
 			if (!this.size() || !className) { return; }
 
 			var result = false,
-				pattern = new RegExp("(^|\\s)" + className + "(\\s|$)");
+				pattern = new RegExp('(^|\\s)' + className + '(\\s|$)');
 
 			this.each(function (el) {
 				if (pattern.test(el.className)) {
@@ -609,16 +609,12 @@
 		removeClass: function (className) {
 			if (!this.size()) { return; }
 
-			var pattern = new RegExp('\\b' + className + '\\b', 'g');
+			var pattern = new RegExp('(^|\\s)' + className + '(\\s|$)', 'g');
 
 			return this.each(function (el) {
-				var $el = new domster(el);
-
-				if ($el.hasClass(className)) {
-					el.className = el.className.replace(pattern, '');
-				} else if (!className) {
-					el.className = '';
-				}
+				el.className = (className)
+					? el.className.replace(pattern, '')
+					: el.className = '';
 			});
 		},
 
