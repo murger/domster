@@ -647,9 +647,9 @@
 			var fx;
 
 			return this.each(function (el) {
-				el.addEventListener(type, fx = function () {
-					fn(arguments);
+				el.addEventListener(type, fx = function (e) {
 					el.removeEventListener(type, fx);
+					fn(e);
 				});
 			});
 		},
