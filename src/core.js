@@ -213,12 +213,13 @@
 	// #########################################################################
 
 	extend(domster, {
-		each: each,
+		fn: domster.prototype,
 		extend: extend,
+		each: each,
 		type: type
 	});
 
-	extend(domster.prototype, {
+	extend(domster.fn, {
 		set: [],
 
 		get: function (idx) {
@@ -671,12 +672,12 @@
 	// ### ALIASES #############################################################
 	// #########################################################################
 
-	extend(domster.prototype, {
-		closest: domster.prototype.ancestor,
-		replaceWith: domster.prototype.swap,
-		one: domster.prototype.once,
-		css: domster.prototype.style,
-		length: domster.prototype.size
+	extend(domster.fn, {
+		closest: domster.fn.ancestor,
+		replaceWith: domster.fn.swap,
+		one: domster.fn.once,
+		css: domster.fn.style,
+		length: domster.fn.size
 	});
 
 	// #########################################################################
