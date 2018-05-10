@@ -289,6 +289,19 @@
 			return this;
 		},
 
+		add: function (query) {
+			if (!this.size() || !query) { return; }
+
+			var set = slice.call(this.set),
+				result = slice.call(select(query));
+
+			if (result.length > 0) {
+				this.set = extend(set, result, true);
+			}
+
+			return this;
+		},
+
 		first: function () {
 			if (!this.size()) { return; }
 
