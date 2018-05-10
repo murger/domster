@@ -34,7 +34,7 @@ If you encounter a bug or require additional functionality, please let us know.
 * after
 * append
 * prepend
-* replaceWith
+* replace (replaceWith)
 * clone
 * remove
 * empty

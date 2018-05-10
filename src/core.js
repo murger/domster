@@ -475,7 +475,7 @@
 			}, this);
 		},
 
-		replaceWith: function (src) {
+		replace: function (src) {
 			return mutate(src, function (el, src) {
 				var mark = el.nextSibling;
 
@@ -731,6 +731,7 @@
 		eq: domster.fn.at,
 		add: domster.fn.push,
 		closest: domster.fn.ancestor,
+		replaceWith: domster.fn.replace,
 		one: domster.fn.once,
 		css: domster.fn.style,
 		length: domster.fn.size
