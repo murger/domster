@@ -11,14 +11,11 @@ Use it via `npm i domster` or `<script src="//unpkg.com/domster"></script>`\
 If you encounter a bug or require additional functionality, please let us know.
 
 ## Traversal
-* get
-* size (length)
-* each
 * is
-* not
-* eq
 * first
 * last
+* at (eq)
+* not
 * push (add)
 * ancestor (closest)
 * parent
@@ -26,13 +23,16 @@ If you encounter a bug or require additional functionality, please let us know.
 * siblings
 * find
 * filter
+* each
+* size (length)
+* get
 
 ## Mutation
 * before
 * after
 * append
 * prepend
-* replaceWith
+* replace (replaceWith)
 * clone
 * remove
 * empty

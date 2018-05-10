@@ -275,18 +275,22 @@
 			}, this);
 		},
 
-		eq: function (idx) {
+		at: function (idx) {
 			if (!this.size() || !isNum(idx)) { return; }
 
-			var size = this.size(),
-				x = (idx < 0 ? this.size() + idx : idx),
-				el = this.get(x);
+			var mark = this.set,
+				x, group;
 
-			if (!el) { return; }
+			return transform(function (el, set) {
+				group = slice.call(el.parentNode.children);
+				x = (idx < 0 && -idx <= group.length)
+					? group.length + idx
+					: idx;
 
-			this.set = [el];
-
-			return this;
+				if (group.indexOf(el) === x) {
+					set.push(el);
+				}
+			}, this);
 		},
 
 		push: function (query) {
@@ -441,7 +445,7 @@
 			}, this);
 		},
 
-		replaceWith: function (node) {
+		replace: function (node) {
 			return mutate(node, function (el, set) {
 				set.each(function (n) {
 					el.parentNode.replaceChild(n.cloneNode(true), el);
@@ -691,8 +695,10 @@
 	// #########################################################################
 
 	extend(domster.fn, {
+		eq: domster.fn.at,
 		add: domster.fn.push,
 		closest: domster.fn.ancestor,
+		replaceWith: domster.fn.replace,
 		one: domster.fn.once,
 		css: domster.fn.style,
 		length: domster.fn.size
