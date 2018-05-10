@@ -17,9 +17,9 @@ If you encounter a bug or require additional functionality, please let us know.
 * is
 * not
 * eq
-* add
 * first
 * last
+* add
 * ancestor (closest)
 * parent
 * children

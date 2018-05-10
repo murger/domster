@@ -293,11 +293,16 @@
 			if (!this.size() || !query) { return; }
 
 			var set = slice.call(this.set),
-				result = slice.call(select(query));
+				mark;
 
-			if (result.length > 0) {
-				this.set = extend(set, result, true);
-			}
+			if (isEl(query) || isList(query)) { mark = query; }
+			else if (isStr(query)) { mark = slice.call(select(query)); }
+
+			each(mark, function (el) {
+				if (!~set.indexOf(el)) { set.push(el); }
+			});
+
+			this.set = set;
 
 			return this;
 		},
