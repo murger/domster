@@ -15,6 +15,8 @@ If you encounter a bug or require additional functionality, please let us know.
 * first
 * last
 * at (eq)
+* prev
+* next
 * not
 * push (add)
 * ancestor (closest)

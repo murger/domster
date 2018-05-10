@@ -293,7 +293,7 @@
 					? group.length + idx
 					: idx;
 
-				if (x && group.indexOf(el) === x) {
+				if (group.indexOf(el) === x) {
 					set.push(el);
 				}
 			}, this);
@@ -333,6 +333,30 @@
 			this.set = [this.get(size - 1)];
 
 			return this;
+		},
+
+		next: function (query) {
+			if (!this.size()) { return; }
+
+			return transform(function (el, set) {
+				var next = el.nextElementSibling;
+
+				if (isEl(next) && (!query || matches.call(next, query))) {
+					set.push(next);
+				}
+			}, this);
+		},
+
+		prev: function (query) {
+			if (!this.size()) { return; }
+
+			return transform(function (el, set) {
+				var prev = el.previousElementSibling;
+
+				if (isEl(prev) && (!query || matches.call(prev, query))) {
+					set.push(prev);
+				}
+			}, this);
 		},
 
 		ancestor: function (query) {
