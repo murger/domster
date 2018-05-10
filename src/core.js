@@ -76,13 +76,13 @@
 		return set; // tag.class
 	},
 
-	mutate = function (node, iterator, obj) {
+	mutate = function (src, iterator, obj) {
 		if (!obj.size()) { return; }
-		else if (!isEl(node) && !isList(node) && !isSet(node)) { return; }
-		else if (isEl(node) || isList(node)) { node = new domster(node); }
+		else if (!isEl(src) && !isList(src) && !isSet(src)) { return; }
+		else if (isEl(src) || isList(src)) { src = new domster(src); }
 
-		obj.each(function (el) { return iterator(el, node); });
-		node.remove();
+		obj.each(function (el) { return iterator(el, src); });
+		src.remove();
 
 		return obj;
 	},
@@ -417,44 +417,47 @@
 		// #     # #     #    #    #     #    #    #
 		// #     #  #####     #    #     #    #    #######
 
-		before: function (node) {
-			return mutate(node, function (el, set) {
-				set.each(function (n) {
-					el.parentNode.insertBefore(n.cloneNode(true), el);
+		before: function (src) {
+			return mutate(src, function (el, src) {
+				src.each(function (node) {
+					el.parentNode.insertBefore(node.cloneNode(true), el);
 				});
 			}, this);
 		},
 
-		after: function (node) {
-			return mutate(node, function (el, set) {
+		after: function (src) {
+			return mutate(src, function (el, src) {
 				var mark = el.nextSibling;
 
-				set.each(function (n) {
-					el.parentNode.insertBefore(n.cloneNode(true), mark);
+				src.each(function (node) {
+					el.parentNode.insertBefore(node.cloneNode(true), mark);
 				});
 			}, this);
 		},
 
-		append: function (node) {
-			return mutate(node, function (el, set) {
-				set.each(function (n) {
-					el.appendChild(n.cloneNode(true));
+		append: function (src) {
+			return mutate(src, function (el, src) {
+				src.each(function (node) {
+					el.appendChild(node.cloneNode(true));
 				});
 			}, this);
 		},
 
-		prepend: function (node) {
-			return mutate(node, function (el, set) {
-				set.each(function (n) {
-					el.insertBefore(n.cloneNode(true), el.firstChild);
+		prepend: function (src) {
+			return mutate(src, function (el, src) {
+				src.each(function (node) {
+					el.insertBefore(node.cloneNode(true), el.firstChild);
 				});
 			}, this);
 		},
 
-		replace: function (node) {
-			return mutate(node, function (el, set) {
-				set.each(function (n) {
-					el.parentNode.replaceChild(n.cloneNode(true), el);
+		replaceWith: function (src) {
+			return mutate(src, function (el, src) {
+				var mark = el.nextSibling;
+
+				el.parentNode.removeChild(el);
+				src.each(function (node) {
+					mark.parentNode.insertBefore(node.cloneNode(true), mark);
 				});
 			}, this);
 		},
@@ -704,7 +707,6 @@
 		eq: domster.fn.at,
 		add: domster.fn.push,
 		closest: domster.fn.ancestor,
-		replaceWith: domster.fn.replace,
 		one: domster.fn.once,
 		css: domster.fn.style,
 		length: domster.fn.size
