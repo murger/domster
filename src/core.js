@@ -281,24 +281,6 @@
 			}, this);
 		},
 
-		at: function (idx) {
-			if (!this.size() || !isNum(idx)) { return; }
-
-			var mark = this.set,
-				x, group;
-
-			return transform(function (el, set) {
-				group = slice.call(el.parentNode.children);
-				x = (idx < 0 && -idx <= group.length)
-					? group.length + idx
-					: idx;
-
-				if (group.indexOf(el) === x) {
-					set.push(el);
-				}
-			}, this);
-		},
-
 		push: function (query) {
 			if (!this.size() || !query) { return; }
 
@@ -315,6 +297,24 @@
 			this.set = set;
 
 			return this;
+		},
+
+		at: function (idx) {
+			if (!this.size() || !isNum(idx)) { return; }
+
+			var mark = this.set,
+				x, group;
+
+			return transform(function (el, set) {
+				group = slice.call(el.parentNode.children);
+				x = (idx < 0 && -idx <= group.length)
+					? group.length + idx
+					: idx;
+
+				if (group.indexOf(el) === x) {
+					set.push(el);
+				}
+			}, this);
 		},
 
 		first: function () {
@@ -341,7 +341,7 @@
 			return transform(function (el, set) {
 				var next = el.nextElementSibling;
 
-				if (isEl(next) && (!query || matches.call(next, query))) {
+				if (next && (!query || matches.call(next, query))) {
 					set.push(next);
 				}
 			}, this);
@@ -353,7 +353,7 @@
 			return transform(function (el, set) {
 				var prev = el.previousElementSibling;
 
-				if (isEl(prev) && (!query || matches.call(prev, query))) {
+				if (prev && (!query || matches.call(prev, query))) {
 					set.push(prev);
 				}
 			}, this);
