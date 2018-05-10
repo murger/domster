@@ -133,7 +133,7 @@
 	},
 
 	isNum = function (obj) {
-		return obj && type(obj) === 'number';
+		return type(obj) === 'number';
 	},
 
 	isArray = function (obj) {
@@ -227,7 +227,7 @@
 		},
 
 		get: function (idx) {
-			if (!this.size() || !idx) { return; }
+			if (!this.size() || !isNum(idx)) { return; }
 
 			var x = (idx < 0 && -idx <= this.size())
 				? this.size() + idx
