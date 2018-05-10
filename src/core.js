@@ -289,7 +289,7 @@
 			return this;
 		},
 
-		add: function (query) {
+		push: function (query) {
 			if (!this.size() || !query) { return; }
 
 			var set = slice.call(this.set),
@@ -691,6 +691,7 @@
 	// #########################################################################
 
 	extend(domster.fn, {
+		add: domster.fn.push,
 		closest: domster.fn.ancestor,
 		one: domster.fn.once,
 		css: domster.fn.style,

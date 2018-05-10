@@ -19,7 +19,7 @@ If you encounter a bug or require additional functionality, please let us know.
 * eq
 * first
 * last
-* add
+* push (add)
 * ancestor (closest)
 * parent
 * children
