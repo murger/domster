@@ -222,12 +222,18 @@
 	extend(domster.fn, {
 		set: [],
 
-		get: function (idx) {
-			return this.set[idx];
-		},
-
 		size: function () {
 			return this.set.length;
+		},
+
+		get: function (idx) {
+			if (!this.size() || !idx) { return; }
+
+			var x = (idx < 0 && -idx <= this.size())
+				? this.size() + idx
+				: idx;
+
+			return this.set[x];
 		},
 
 		each: function () {
@@ -287,7 +293,7 @@
 					? group.length + idx
 					: idx;
 
-				if (group.indexOf(el) === x) {
+				if (x && group.indexOf(el) === x) {
 					set.push(el);
 				}
 			}, this);
