@@ -542,6 +542,19 @@
 			}
 		},
 
+		index: function () {
+			if (!this.size()) { return; }
+
+			var el = this.get(0),
+				children = el.parentNode.children;
+
+			for (var idx = 0; idx < children.length; idx++) {
+				if (el === children[idx]) { break; }
+			}
+
+			return idx;
+		},
+
 		val: function (val) {
 			if (!this.size()) { return; }
 

@@ -27,6 +27,7 @@ If you encounter a bug or require additional functionality, please let us know.
 * filter
 * each
 * size (length)
+* index
 * get
 
 ## Mutation
