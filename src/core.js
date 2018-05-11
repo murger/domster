@@ -302,8 +302,7 @@
 		at: function (idx) {
 			if (!this.size() || !isNum(idx)) { return; }
 
-			var mark = this.set,
-				x, group;
+			var x, group;
 
 			return transform(function (el, set) {
 				group = slice.call(el.parentNode.children);
@@ -392,7 +391,7 @@
 		siblings: function (query) {
 			if (!this.size()) { return; }
 
-			var mark = this.set;
+			var mark = slice.call(this.set);
 
 			return transform(function (el, set) {
 				if (!~mark.indexOf(el) && (!query || matches.call(el, query))) {
