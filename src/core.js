@@ -18,16 +18,16 @@
 			return new domster(query, context);
 		}
 
-		if (/^<.*>$/.test(query)) {
+		if (isSet(query)) {
+			this.set = query.set;
+		} else if (/^<.*>$/.test(query)) {
 			this.set = create(query);
 		} else if (typeof query === 'string') {
 			this.set = select(query, context);
-		} else if (isList(query)) {
-			this.set = query;
 		} else if (isEl(query)) {
 			this.set = [query];
-		} else if (query instanceof domster) {
-			this.set = query.set;
+		} else if (isList(query)) {
+			this.set = query;
 		}
 
 		return this;
