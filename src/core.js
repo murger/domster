@@ -14,14 +14,12 @@
 	}
 
 	var domster = function (query, context) {
-		var match;
-
 		if (!isSet(this)) {
 			return new domster(query, context);
 		}
 
-		if (match = /^<([\w]+)>$/.exec(query)) {
-			this.set = create(match[1]);
+		if (/^<.*>$/.test(query)) {
+			this.set = create(query);
 		} else if (typeof query === 'string') {
 			this.set = select(query, context);
 		} else if (isList(query)) {
@@ -35,8 +33,13 @@
 		return this;
 	},
 
-	create = function (tag) {
-		return [window.document.createElement(tag)];
+	create = function (html) {
+		var frag = document.createDocumentFragment(),
+			wrap = frag.appendChild(document.createElement('div'));
+
+		wrap.innerHTML = html;
+
+		return wrap.children;
 	},
 
 	select = function (query, context) {
