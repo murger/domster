@@ -47,12 +47,12 @@
 			found,
 			set = [];
 
-		if (map = /^([#\.\w]+)\s+([#\.\w]+)$/.exec(query)) {
-			return select(map[2], map[1]);
+		if (map = /^([#\.\w]+(\[.+\])?)\s+([#\.\w]+(\[.+\])?)$/.exec(query)) {
+			return select(map[3], map[1]); // re-phrase
 		} else if (!context) {
-			context = window.document;
+			context = window.document; // default context
 		} else if (!isEl(context) && !isDoc(context)) {
-			context = select(context)[0];
+			context = select(context)[0]; // select context
 		}
 
 		// #id
